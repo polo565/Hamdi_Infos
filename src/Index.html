@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <?!= include('Styles'); ?>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand">
+        <h1 id="siteTitle">…</h1>
+        <p id="siteSubtitle"></p>
+      </div>
+      <div class="header-actions">
+        <div class="lang-switch" id="langSwitch">
+          <button data-lang="ar">ع</button>
+          <button data-lang="fr">FR</button>
+          <button data-lang="en">EN</button>
+        </div>
+        <a id="supportBtn" class="btn btn-accent" target="_blank" rel="noopener">💛 <span id="supportLabel">Soutenir</span></a>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <nav class="tabs" id="tabs"></nav>
+
+    <div id="loading" class="loading">⏳ …</div>
+
+    <section id="panel" class="panel content hidden"></section>
+
+    <div id="disclaimer" class="disclaimer hidden"></div>
+  </div>
+
+  <footer class="footer">
+    <div id="footerContact"></div>
+    <div style="margin-top:6px">© <span id="year"></span> · <span id="siteTitleFoot"></span></div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    var DATA = null;
+    var ACTIVE = null;
+    var LANG = 'ar';
+
+    var T = {
+      ar: { support:'ادعم', pay:'ادفع الآن', loading:'جارٍ التحميل…', locked:'محتوى مميز', lockedDesc:'ادفع الرسم الرمزي ثم أدخل رمز الوصول لفتح المحتوى الكامل.', enterCode:'أدخل رمز الوصول', unlock:'فتح', badCode:'رمز غير صحيح', unlocked:'تم فتح المحتوى ✓', contact:'للتواصل' },
+      fr: { support:'Soutenir', pay:'Payer', loading:'Chargement…', locked:'Contenu premium', lockedDesc:'Payez les frais symboliques puis entrez le code d\'accès pour débloquer.', enterCode:'Code d\'accès', unlock:'Débloquer', badCode:'Code invalide', unlocked:'Contenu débloqué ✓', contact:'Contact' },
+      en: { support:'Support', pay:'Pay now', loading:'Loading…', locked:'Premium content', lockedDesc:'Pay the small fee then enter your access code to unlock.', enterCode:'Access code', unlock:'Unlock', badCode:'Invalid code', unlocked:'Unlocked ✓', contact:'Contact' }
+    };
+    function t(k){ return (T[LANG] && T[LANG][k]) || T.ar[k] || k; }
+
+    function toast(msg, err){
+      var el = document.getElementById('toast');
+      el.textContent = msg; el.className = 'toast show' + (err ? ' err' : '');
+      setTimeout(function(){ el.className = 'toast'; }, 2600);
+    }
+
+    function setLang(lang){
+      LANG = lang;
+      document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+      document.documentElement.setAttribute('lang', lang);
+      [].forEach.call(document.querySelectorAll('#langSwitch button'), function(b){
+        b.classList.toggle('active', b.getAttribute('data-lang') === lang);
+      });
+      document.getElementById('supportLabel').textContent = t('support');
+      try { localStorage.setItem('guide_lang', lang); } catch(e){}
+      if (ACTIVE) renderPanel(ACTIVE);
+    }
+
+    function init(){
+      document.getElementById('year').textContent = new Date().getFullYear();
+      [].forEach.call(document.querySelectorAll('#langSwitch button'), function(b){
+        b.addEventListener('click', function(){ setLang(b.getAttribute('data-lang')); });
+      });
+      var saved; try { saved = localStorage.getItem('guide_lang'); } catch(e){}
+      google.script.run.withSuccessHandler(onData).withFailureHandler(function(e){
+        document.getElementById('loading').textContent = '⚠️ ' + e.message;
+      }).getPublicData();
+    }
+
+    function onData(data){
+      DATA = data;
+      var s = data.settings || {};
+      setLang((function(){ try { return localStorage.getItem('guide_lang'); } catch(e){} })() || s.lang || 'ar');
+      document.getElementById('siteTitle').textContent = s.siteTitle || '';
+      document.getElementById('siteTitleFoot').textContent = s.siteTitle || '';
+      document.getElementById('siteSubtitle').textContent = s.siteSubtitle || '';
+
+      var sup = document.getElementById('supportBtn');
+      var priceTxt = (s.price ? (s.price + ' ' + (s.currency || '')) : '').trim();
+      document.getElementById('supportLabel').textContent = (s.supportLabel || t('support')) + (priceTxt ? ' · ' + priceTxt : '');
+      if (s.payUrl) { sup.href = s.payUrl; sup.classList.remove('hidden'); }
+      else { sup.classList.add('hidden'); }
+
+      // disclaimer
+      if (s.disclaimer) { var d = document.getElementById('disclaimer'); d.textContent = s.disclaimer; d.classList.remove('hidden'); }
+
+      // footer contact
+      var fc = [];
+      if (s.contactEmail) fc.push('✉️ <a href="mailto:'+s.contactEmail+'">'+s.contactEmail+'</a>');
+      if (s.whatsapp) fc.push('💬 <a target="_blank" rel="noopener" href="https://wa.me/'+String(s.whatsapp).replace(/[^0-9]/g,'')+'">WhatsApp</a>');
+      document.getElementById('footerContact').innerHTML = fc.join(' · ');
+
+      renderTabs(data.tabs || []);
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('panel').classList.remove('hidden');
+      if (data.tabs && data.tabs.length) selectTab(data.tabs[0].id);
+    }
+
+    function renderTabs(tabs){
+      var nav = document.getElementById('tabs');
+      nav.innerHTML = '';
+      tabs.forEach(function(tb){
+        var el = document.createElement('button');
+        el.className = 'tab';
+        el.dataset.id = tb.id;
+        el.innerHTML = '<span class="ic">'+(tb.icon||'')+'</span><span>'+escapeHtml(tb.title)+'</span>'+(tb.locked?'<span class="lock">🔒</span>':'');
+        el.addEventListener('click', function(){ selectTab(tb.id); });
+        nav.appendChild(el);
+      });
+    }
+
+    function selectTab(id){
+      ACTIVE = id;
+      [].forEach.call(document.querySelectorAll('.tab'), function(el){
+        el.classList.toggle('active', el.dataset.id === id);
+      });
+      renderPanel(id);
+    }
+
+    function findTab(id){ return (DATA.tabs || []).filter(function(x){return x.id===id;})[0]; }
+
+    function renderPanel(id){
+      var tb = findTab(id);
+      if (!tb) return;
+      var panel = document.getElementById('panel');
+      if (!tb.locked) { panel.innerHTML = tb.content || ''; return; }
+
+      // locked tab
+      var code; try { code = localStorage.getItem('unlock_' + id); } catch(e){}
+      if (code && tb._unlocked) { panel.innerHTML = tb.content; return; }
+
+      panel.innerHTML =
+        '<div class="locked-box">' +
+          '<div class="big-lock">🔒</div>' +
+          '<h3>'+t('locked')+' · '+escapeHtml(tb.title)+'</h3>' +
+          '<p class="muted">'+escapeHtml(tb.teaser||'')+'…</p>' +
+          '<p>'+t('lockedDesc')+'</p>' +
+        '</div>';
+
+      var s = DATA.settings || {};
+      var pay = document.createElement('div');
+      pay.className = 'pay-box';
+      var priceTxt = (s.price ? (s.price + ' ' + (s.currency||'')) : '').trim();
+      pay.innerHTML = '<div><div class="price">'+priceTxt+'</div><div class="muted">'+escapeHtml(s.supportLabel||'')+'</div></div>';
+      var payActions = document.createElement('div');
+      if (s.payUrl) {
+        var a = document.createElement('a');
+        a.className = 'btn btn-accent'; a.target = '_blank'; a.rel = 'noopener'; a.href = s.payUrl;
+        a.textContent = '💳 ' + t('pay');
+        payActions.appendChild(a);
+      }
+      pay.appendChild(payActions);
+      panel.appendChild(pay);
+
+      var urow = document.createElement('div');
+      urow.className = 'unlock-row';
+      var inp = document.createElement('input');
+      inp.placeholder = t('enterCode'); inp.maxLength = 12;
+      if (code) inp.value = code;
+      var btn = document.createElement('button');
+      btn.className = 'btn btn-primary'; btn.textContent = '🔓 ' + t('unlock');
+      btn.addEventListener('click', function(){ tryUnlock(id, inp.value); });
+      inp.addEventListener('keydown', function(e){ if(e.key==='Enter') tryUnlock(id, inp.value); });
+      urow.appendChild(inp); urow.appendChild(btn);
+      panel.appendChild(urow);
+
+      // auto-try stored code
+      if (code) tryUnlock(id, code, true);
+    }
+
+    function tryUnlock(id, code, silent){
+      code = (code||'').trim().toUpperCase();
+      if (!code) return;
+      google.script.run.withSuccessHandler(function(res){
+        if (res && res.ok) {
+          var tb = findTab(id);
+          tb.content = res.content; tb._unlocked = true;
+          try { localStorage.setItem('unlock_' + id, code); } catch(e){}
+          document.getElementById('panel').innerHTML = res.content;
+          if (!silent) toast(t('unlocked'));
+        } else if (!silent) {
+          toast(t('badCode'), true);
+        }
+      }).getLockedContent(id, code);
+    }
+
+    function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>

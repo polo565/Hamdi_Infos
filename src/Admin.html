@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <?!= include('Styles'); ?>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand">
+        <h1>🛠️ لوحة التحكم <span style="font-size:.8rem;opacity:.85">Dashboard</span></h1>
+        <p>إدارة التبويبات، المحتوى، الأسعار، الدفع ورموز الوصول</p>
+      </div>
+      <div class="header-actions">
+        <a class="btn btn-ghost btn-sm" href="?" target="_top">👁️ عرض الموقع</a>
+        <button id="logoutBtn" class="btn btn-ghost btn-sm hidden" onclick="logout()">خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap" style="padding-top:18px">
+
+    <!-- LOGIN -->
+    <section id="login" class="card" style="max-width:440px;margin:30px auto">
+      <h2>🔐 تسجيل الدخول</h2>
+      <label class="field">مفتاح المدير (Admin key)</label>
+      <input type="password" id="loginKey" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      <div style="margin-top:14px"><button class="btn btn-primary" onclick="doLogin()">دخول</button></div>
+      <p class="muted" id="loginHint" style="margin-top:12px"></p>
+    </section>
+
+    <!-- APP -->
+    <main id="app" class="admin-grid hidden">
+
+      <div id="defaultKeyWarn" class="disclaimer hidden">
+        ⚠️ أنت تستخدم المفتاح الافتراضي <b>admin</b>. غيّره فوراً من قسم «الأمان» بالأسفل.
+      </div>
+
+      <!-- TABS MANAGER -->
+      <div class="card">
+        <h2>📑 التبويبات <button class="btn btn-accent btn-sm" style="margin-inline-start:auto" onclick="openTabForm()">➕ إضافة تبويب</button></h2>
+        <div id="tabsList"></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="card">
+        <h2>⚙️ الإعدادات العامة</h2>
+        <label class="field">عنوان الموقع</label>
+        <input type="text" id="set_siteTitle">
+        <label class="field">العنوان الفرعي</label>
+        <input type="text" id="set_siteSubtitle">
+        <div class="row">
+          <div><label class="field">السعر</label><input type="text" id="set_price" placeholder="5"></div>
+          <div><label class="field">العملة</label><input type="text" id="set_currency" placeholder="€"></div>
+          <div><label class="field">اللغة الافتراضية</label>
+            <select id="set_lang"><option value="ar">العربية</option><option value="fr">Français</option><option value="en">English</option></select>
+          </div>
+        </div>
+        <label class="field">رابط الدفع (Stripe / PayPal / Gumroad …)</label>
+        <input type="url" id="set_payUrl" placeholder="https://buy.stripe.com/...">
+        <div class="row">
+          <div><label class="field">نص زر الدفع</label><input type="text" id="set_payLabel"></div>
+          <div><label class="field">نص زر الدعم (الهيدر)</label><input type="text" id="set_supportLabel"></div>
+        </div>
+        <div class="row">
+          <div><label class="field">بريد التواصل</label><input type="email" id="set_contactEmail"></div>
+          <div><label class="field">رقم واتساب (دولي)</label><input type="text" id="set_whatsapp" placeholder="+39..."></div>
+        </div>
+        <label class="field">تنويه قانوني (يظهر أسفل كل صفحة)</label>
+        <textarea id="set_disclaimer" style="min-height:80px"></textarea>
+        <div style="margin-top:14px"><button class="btn btn-primary" onclick="saveSettings()">💾 حفظ الإعدادات</button></div>
+      </div>
+
+      <!-- ACCESS CODES -->
+      <div class="card">
+        <h2>🎟️ رموز الوصول (للمحتوى المميز)</h2>
+        <p class="muted">أنشئ رموزاً وسلّمها للمستخدم بعد الدفع ليفتح بها التبويبات المقفلة 🔒.</p>
+        <div class="row" style="align-items:flex-end">
+          <div><label class="field">رمز مخصّص (أو اتركه فارغاً للتوليد التلقائي)</label><input type="text" id="newCode" placeholder="تلقائي"></div>
+          <div style="flex:0 0 auto"><button class="btn btn-accent" onclick="addCode()">➕ إنشاء رمز</button></div>
+        </div>
+        <div id="codesList" style="margin-top:12px"></div>
+      </div>
+
+      <!-- SECURITY -->
+      <div class="card">
+        <h2>🔒 الأمان — تغيير مفتاح المدير</h2>
+        <div class="row" style="align-items:flex-end">
+          <div><label class="field">المفتاح الجديد (4 أحرف على الأقل)</label><input type="password" id="newKey"></div>
+          <div style="flex:0 0 auto"><button class="btn btn-primary" onclick="changeKey()">تغيير المفتاح</button></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- TAB EDIT MODAL -->
+  <div id="modal" class="hidden" style="position:fixed;inset:0;background:rgba(10,20,35,.5);z-index:40;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow:auto">
+    <div class="card" style="max-width:640px;width:100%;margin-top:20px">
+      <h2 id="modalTitle">تعديل التبويب</h2>
+      <div class="row">
+        <div style="flex:0 0 90px"><label class="field">الأيقونة</label><input type="text" id="t_icon" placeholder="📄" maxlength="4"></div>
+        <div><label class="field">اسم التبويب</label><input type="text" id="t_title"></div>
+      </div>
+      <label class="field" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="t_locked" style="width:auto"> 🔒 محتوى مميز (يتطلب دفعاً + رمز وصول)
+      </label>
+      <label class="field">المحتوى (يدعم HTML بسيط: &lt;h3&gt; &lt;p&gt; &lt;ul&gt; &lt;li&gt; &lt;b&gt;)</label>
+      <textarea id="t_content"></textarea>
+      <div style="margin-top:14px;display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="saveTab()">💾 حفظ</button>
+        <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    var KEY = '';
+    var STATE = null;
+    var EDIT_ID = null;
+
+    function toast(msg, err){
+      var el = document.getElementById('toast');
+      el.textContent = msg; el.className = 'toast show' + (err ? ' err' : '');
+      setTimeout(function(){ el.className = 'toast'; }, 2800);
+    }
+    function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+    window.addEventListener('load', function(){
+      var saved; try { saved = sessionStorage.getItem('admin_key'); } catch(e){}
+      if (saved) { KEY = saved; loadData(); }
+    });
+
+    function doLogin(){
+      var k = document.getElementById('loginKey').value;
+      google.script.run.withSuccessHandler(function(ok){
+        if (ok) { KEY = k; try{ sessionStorage.setItem('admin_key', k); }catch(e){} loadData(); }
+        else { document.getElementById('loginHint').textContent = '❌ مفتاح غير صحيح.'; }
+      }).adminLogin(k);
+    }
+    function logout(){ KEY=''; try{ sessionStorage.removeItem('admin_key'); }catch(e){} location.reload(); }
+
+    function loadData(){
+      google.script.run.withSuccessHandler(onData).withFailureHandler(onFail).adminGetData(KEY);
+    }
+    function onFail(e){
+      if (/UNAUTHORIZED/.test(e.message)) { logout(); return; }
+      toast('خطأ: ' + e.message, true);
+    }
+    function onData(data){
+      STATE = data;
+      document.getElementById('login').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      document.getElementById('logoutBtn').classList.remove('hidden');
+      document.getElementById('defaultKeyWarn').classList.toggle('hidden', !data.adminKeyIsDefault);
+      fillSettings(data.settings);
+      renderTabs(data.tabs);
+      renderCodes(data.codes);
+    }
+
+    /* ----- Tabs ----- */
+    function renderTabs(tabs){
+      var box = document.getElementById('tabsList');
+      box.innerHTML = '';
+      tabs.forEach(function(tb, i){
+        var el = document.createElement('div');
+        el.className = 'list-item';
+        el.innerHTML =
+          '<div class="meta"><span style="font-size:1.1rem">'+esc(tb.icon)+'</span>'+
+          '<span class="t-title">'+esc(tb.title)+'</span>'+
+          (tb.locked?'<span class="pill lock">🔒 مميز</span>':'')+'</div>'+
+          '<div class="item-actions">'+
+            '<button class="btn btn-ghost btn-sm" '+(i===0?'disabled':'')+' data-up="'+tb.id+'">▲</button>'+
+            '<button class="btn btn-ghost btn-sm" '+(i===tabs.length-1?'disabled':'')+' data-down="'+tb.id+'">▼</button>'+
+            '<button class="btn btn-ghost btn-sm" data-edit="'+tb.id+'">✏️ تعديل</button>'+
+            '<button class="btn btn-danger btn-sm" data-del="'+tb.id+'">🗑️</button>'+
+          '</div>';
+        box.appendChild(el);
+      });
+      box.querySelectorAll('[data-edit]').forEach(function(b){ b.onclick=function(){ openTabForm(b.getAttribute('data-edit')); }; });
+      box.querySelectorAll('[data-del]').forEach(function(b){ b.onclick=function(){ delTab(b.getAttribute('data-del')); }; });
+      box.querySelectorAll('[data-up]').forEach(function(b){ b.onclick=function(){ move(b.getAttribute('data-up'),-1); }; });
+      box.querySelectorAll('[data-down]').forEach(function(b){ b.onclick=function(){ move(b.getAttribute('data-down'),1); }; });
+    }
+
+    function openTabForm(id){
+      EDIT_ID = id || null;
+      var tb = id ? STATE.tabs.filter(function(x){return x.id===id;})[0] : { icon:'📄', title:'', locked:false, content:'' };
+      document.getElementById('modalTitle').textContent = id ? 'تعديل التبويب' : 'تبويب جديد';
+      document.getElementById('t_icon').value = tb.icon || '';
+      document.getElementById('t_title').value = tb.title || '';
+      document.getElementById('t_locked').checked = !!tb.locked;
+      document.getElementById('t_content').value = tb.content || '';
+      document.getElementById('modal').classList.remove('hidden');
+    }
+    function closeModal(){ document.getElementById('modal').classList.add('hidden'); EDIT_ID=null; }
+
+    function saveTab(){
+      var data = {
+        icon: document.getElementById('t_icon').value || '📄',
+        title: document.getElementById('t_title').value.trim() || 'تبويب',
+        locked: document.getElementById('t_locked').checked,
+        content: document.getElementById('t_content').value
+      };
+      var fn = EDIT_ID
+        ? function(){ google.script.run.withSuccessHandler(afterTab).withFailureHandler(onFail).adminUpdateTab(KEY, EDIT_ID, data); }
+        : function(){ google.script.run.withSuccessHandler(afterTab).withFailureHandler(onFail).adminAddTab(KEY, data); };
+      fn();
+    }
+    function afterTab(data){ closeModal(); onData(data); toast('تم الحفظ ✓'); }
+
+    function delTab(id){
+      if (!confirm('حذف هذا التبويب نهائياً؟')) return;
+      google.script.run.withSuccessHandler(function(d){ onData(d); toast('تم الحذف'); }).withFailureHandler(onFail).adminDeleteTab(KEY, id);
+    }
+    function move(id, dir){
+      var ids = STATE.tabs.map(function(t){return t.id;});
+      var i = ids.indexOf(id); var j = i + dir;
+      if (j<0 || j>=ids.length) return;
+      ids.splice(i,1); ids.splice(j,0,id);
+      google.script.run.withSuccessHandler(function(d){ onData(d); }).withFailureHandler(onFail).adminReorder(KEY, ids);
+    }
+
+    /* ----- Settings ----- */
+    function fillSettings(s){
+      var f=['siteTitle','siteSubtitle','price','currency','payUrl','payLabel','supportLabel','contactEmail','whatsapp','disclaimer'];
+      f.forEach(function(k){ var el=document.getElementById('set_'+k); if(el) el.value=s[k]||''; });
+      document.getElementById('set_lang').value = s.lang || 'ar';
+    }
+    function saveSettings(){
+      var s = {
+        siteTitle: v('set_siteTitle'), siteSubtitle: v('set_siteSubtitle'),
+        price: v('set_price'), currency: v('set_currency'), lang: v('set_lang'),
+        payUrl: v('set_payUrl'), payLabel: v('set_payLabel'), supportLabel: v('set_supportLabel'),
+        contactEmail: v('set_contactEmail'), whatsapp: v('set_whatsapp'), disclaimer: v('set_disclaimer')
+      };
+      google.script.run.withSuccessHandler(function(d){ onData(d); toast('تم حفظ الإعدادات ✓'); }).withFailureHandler(onFail).adminSaveSettings(KEY, s);
+    }
+    function v(id){ return document.getElementById(id).value; }
+
+    /* ----- Codes ----- */
+    function renderCodes(codes){
+      var box = document.getElementById('codesList');
+      if (!codes.length) { box.innerHTML = '<p class="muted">لا توجد رموز بعد.</p>'; return; }
+      box.innerHTML = '';
+      codes.forEach(function(c){
+        var el = document.createElement('div');
+        el.className = 'list-item';
+        el.innerHTML = '<div class="meta"><span class="code-chip">'+esc(c.code)+'</span></div>'+
+          '<button class="btn btn-danger btn-sm" data-del="'+esc(c.code)+'">🗑️ حذف</button>';
+        box.appendChild(el);
+      });
+      box.querySelectorAll('[data-del]').forEach(function(b){ b.onclick=function(){
+        google.script.run.withSuccessHandler(function(d){ onData(d); toast('تم حذف الرمز'); }).withFailureHandler(onFail).adminDeleteCode(KEY, b.getAttribute('data-del'));
+      };});
+    }
+    function addCode(){
+      var c = document.getElementById('newCode').value;
+      google.script.run.withSuccessHandler(function(d){ document.getElementById('newCode').value=''; onData(d); toast('تم إنشاء الرمز ✓'); }).withFailureHandler(onFail).adminAddCode(KEY, c);
+    }
+
+    /* ----- Security ----- */
+    function changeKey(){
+      var nk = document.getElementById('newKey').value;
+      if (nk.length < 4) { toast('المفتاح قصير جداً', true); return; }
+      google.script.run.withSuccessHandler(function(){
+        document.getElementById('newKey').value='';
+        KEY = nk; try{ sessionStorage.setItem('admin_key', nk); }catch(e){}
+        toast('تم تغيير المفتاح ✓'); loadData();
+      }).withFailureHandler(onFail).adminChangeKey(KEY, nk);
+    }
+  </script>
+</body>
+</html>
