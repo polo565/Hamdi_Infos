@@ -13,6 +13,7 @@
         <p>التبويبات · الأسعار · الروابط · الدفع (PayPal / USDT) · الطلبات</p>
       </div>
       <div class="header-actions">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="theme" title="Dark / Light"><span class="tt-track"><span class="tt-ic">☀️</span><span class="tt-ic">🌙</span><span class="tt-knob"></span></span></button>
         <a class="btn btn-ghost btn-sm" href="?" target="_top">👁️ عرض الموقع</a>
         <button id="logoutBtn" class="btn btn-ghost btn-sm hidden" onclick="logout()">خروج</button>
       </div>
@@ -124,7 +125,7 @@
         <div><label class="field">السعر (0 = مجاني)</label><input type="number" id="t_price" min="0" step="1" value="0"></div>
       </div>
 
-      <div style="background:#eef6ff;border:1px solid #cfe3fb;border-radius:10px;padding:10px 12px;margin-top:12px">
+      <div class="edit-lang-hint">
         <label class="field" style="margin-top:0">🌐 لغة التحرير — النصوص أدناه (الاسم/الوصف/المحتوى) خاصة بهذه اللغة</label>
         <select id="t_lang"></select>
       </div>
@@ -157,6 +158,8 @@
     function toObj(x){if(x==null)return {};if(typeof x==='string')return {ar:x};return Object.assign({},x);}
     function clean(o){var out={};for(var k in o){if(o[k]&&String(o[k]).length)out[k]=o[k];}return out;}
 
+    function toggleTheme(){var cur=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',cur);try{localStorage.setItem('guide_theme',cur);}catch(e){}}
+    (function(){var th;try{th=localStorage.getItem('guide_theme');}catch(e){}if(!th)th=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';document.documentElement.setAttribute('data-theme',th);})();
     window.addEventListener('load',function(){
       document.getElementById('t_lang').addEventListener('change',function(){saveLangFields(CURLANG);CURLANG=this.value;loadLangFields(CURLANG);});
       var k;try{k=sessionStorage.getItem('admin_key');}catch(e){}if(k){KEY=k;loadData();}
