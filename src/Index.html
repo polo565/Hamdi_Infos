@@ -50,11 +50,12 @@
     var DATA=null, LANG='ar', CURRENT=null, PAYMETHOD='paypal';
     var COUNTRIES=['فرنسا France','إيطاليا Italia','إسبانيا España','ألمانيا Deutschland','بلجيكا Belgique','هولندا Nederland','دولة أوروبية أخرى'];
     var T={
-      ar:{back:'رجوع',loading:'جارٍ التحميل…',free:'مجاني',buy:'احصل على المعلومة',official:'روابط رسمية',locked:'محتوى مدفوع',haveCode:'لديّ رمز وصول',enterCode:'أدخل رمز الوصول',unlock:'فتح',badCode:'رمز غير صحيح',unlocked:'تم الفتح ✓',pay:'طريقة الدفع',payPaypal:'PayPal',payUsdt:'USDT (Bybit)',copy:'نسخ',copied:'تم النسخ ✓',amount:'المبلغ',network:'الشبكة',afterPay:'بعد الدفع، أكمل النموذج أدناه لنرسل لك رمز الوصول:',country:'دولتك',contact:'بريدك أو رقم واتساب',proof:'رقم العملية / مرجع الدفع (TxID)',send:'إرسال الطلب',sent:'تم استلام طلبك ✓ سنراجع الدفع ونرسل لك رمز الوصول.',fill:'يرجى ملء المبلغ والتواصل ورقم العملية.',payPaypalBtn:'ادفع عبر PayPal',openBybit:'افتح Bybit وحوّل USDT إلى هذا العنوان',contactL:'للتواصل'},
-      fr:{back:'Retour',loading:'Chargement…',free:'Gratuit',buy:'Obtenir l\'info',official:'Liens officiels',locked:'Contenu payant',haveCode:'J\'ai un code',enterCode:'Code d\'accès',unlock:'Débloquer',badCode:'Code invalide',unlocked:'Débloqué ✓',pay:'Moyen de paiement',payPaypal:'PayPal',payUsdt:'USDT (Bybit)',copy:'Copier',copied:'Copié ✓',amount:'Montant',network:'Réseau',afterPay:'Après paiement, remplissez ce formulaire pour recevoir votre code :',country:'Votre pays',contact:'Email ou WhatsApp',proof:'ID de transaction (TxID) / réf.',send:'Envoyer la demande',sent:'Demande reçue ✓ Nous vérifions et envoyons votre code.',fill:'Remplissez montant, contact et TxID.',payPaypalBtn:'Payer avec PayPal',openBybit:'Ouvrez Bybit et envoyez l\'USDT à cette adresse',contactL:'Contact'},
-      en:{back:'Back',loading:'Loading…',free:'Free',buy:'Get the info',official:'Official links',locked:'Paid content',haveCode:'I have a code',enterCode:'Access code',unlock:'Unlock',badCode:'Invalid code',unlocked:'Unlocked ✓',pay:'Payment method',payPaypal:'PayPal',payUsdt:'USDT (Bybit)',copy:'Copy',copied:'Copied ✓',amount:'Amount',network:'Network',afterPay:'After paying, fill this form to receive your code:',country:'Your country',contact:'Email or WhatsApp',proof:'Transaction ID (TxID) / ref',send:'Send request',sent:'Request received ✓ We will verify and send your code.',fill:'Fill amount, contact and TxID.',payPaypalBtn:'Pay with PayPal',openBybit:'Open Bybit and send USDT to this address',contactL:'Contact'}
+      ar:{back:'رجوع',loading:'جارٍ التحميل…',free:'مجاني',buy:'احصل على المعلومة',official:'روابط رسمية',locked:'محتوى مدفوع',haveCode:'لديّ رمز وصول',enterCode:'أدخل رمز الوصول',unlock:'فتح',badCode:'رمز غير صحيح',unlocked:'تم الفتح ✓',pay:'طريقة الدفع',payPaypal:'PayPal',payUsdt:'USDT (Bybit)',copy:'نسخ',copied:'تم النسخ ✓',amount:'المبلغ',network:'الشبكة',afterPay:'بعد الدفع، أكمل النموذج أدناه لنرسل لك رمز الوصول:',country:'دولتك',contact:'بريدك أو رقم واتساب',proof:'رقم العملية / مرجع الدفع (TxID)',send:'إرسال الطلب',sent:'تم استلام طلبك ✓ سنراجع الدفع ونرسل لك رمز الوصول.',fill:'يرجى ملء المبلغ والتواصل ورقم العملية.',payPaypalBtn:'ادفع عبر PayPal',openBybit:'افتح Bybit وحوّل USDT إلى هذا العنوان',scanPay:'امسح الكود للدفع عبر الهاتف',contactL:'للتواصل'},
+      fr:{back:'Retour',loading:'Chargement…',free:'Gratuit',buy:'Obtenir l\'info',official:'Liens officiels',locked:'Contenu payant',haveCode:'J\'ai un code',enterCode:'Code d\'accès',unlock:'Débloquer',badCode:'Code invalide',unlocked:'Débloqué ✓',pay:'Moyen de paiement',payPaypal:'PayPal',payUsdt:'USDT (Bybit)',copy:'Copier',copied:'Copié ✓',amount:'Montant',network:'Réseau',afterPay:'Après paiement, remplissez ce formulaire pour recevoir votre code :',country:'Votre pays',contact:'Email ou WhatsApp',proof:'ID de transaction (TxID) / réf.',send:'Envoyer la demande',sent:'Demande reçue ✓ Nous vérifions et envoyons votre code.',fill:'Remplissez montant, contact et TxID.',payPaypalBtn:'Payer avec PayPal',openBybit:'Ouvrez Bybit et envoyez l\'USDT à cette adresse',scanPay:'Scannez pour payer',contactL:'Contact'},
+      en:{back:'Back',loading:'Loading…',free:'Free',buy:'Get the info',official:'Official links',locked:'Paid content',haveCode:'I have a code',enterCode:'Access code',unlock:'Unlock',badCode:'Invalid code',unlocked:'Unlocked ✓',pay:'Payment method',payPaypal:'PayPal',payUsdt:'USDT (Bybit)',copy:'Copy',copied:'Copied ✓',amount:'Amount',network:'Network',afterPay:'After paying, fill this form to receive your code:',country:'Your country',contact:'Email or WhatsApp',proof:'Transaction ID (TxID) / ref',send:'Send request',sent:'Request received ✓ We will verify and send your code.',fill:'Fill amount, contact and TxID.',payPaypalBtn:'Pay with PayPal',openBybit:'Open Bybit and send USDT to this address',scanPay:'Scan to pay',contactL:'Contact'}
     };
     function t(k){return (T[LANG]&&T[LANG][k])||T.ar[k]||k;}
+    function pick(o){if(!o)return '';if(typeof o==='string')return o;return o[LANG]||o.ar||o.fr||o.en||'';}
     function toast(m,e){var el=document.getElementById('toast');el.textContent=m;el.className='toast show'+(e?' err':'');setTimeout(function(){el.className='toast';},2600);}
     function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
@@ -123,8 +124,8 @@
       if(code) tryUnlock(id,code,true);
     }
 
-    function renderContent(html, links){
-      var out=html||'';
+    function renderContent(content, links){
+      var out=pick(content)||'';
       if(links && links.length){
         out+='<div class="links-box"><h4>🔗 '+t('official')+'</h4>';
         links.forEach(function(l){ out+='<a class="link-row" target="_blank" rel="noopener" href="'+esc(l.url)+'"><span>🌐</span><span>'+esc(l.label)+'</span><span class="ext">↗</span></a>'; });
@@ -139,7 +140,7 @@
       var body=document.getElementById('topicBody');
       body.innerHTML=
         '<div class="locked-head"><div class="big">🔒</div><h3>'+esc(tb.title)+' · '+t('locked')+'</h3>'+
-        '<p class="muted">'+esc(tb.teaser||'')+'…</p><div class="price-tag">'+tb.price+' '+esc(cur)+'</div></div>'+
+        '<p class="muted">'+esc(pick(tb.teaser)||'')+'…</p><div class="price-tag">'+tb.price+' '+esc(cur)+'</div></div>'+
         '<div class="pay-methods" id="pm">'+
           '<button data-m="paypal" class="active"><span class="pm-ic">🅿️</span>'+t('payPaypal')+'</button>'+
           '<button data-m="usdt"><span class="pm-ic">₮</span>'+t('payUsdt')+'</button>'+
@@ -165,9 +166,12 @@
     function renderMethodPane(tb){
       var s=DATA.settings||{}; var cur=s.currency||'€'; var pane=document.getElementById('methodPane');
       if(PAYMETHOD==='paypal'){
-        pane.innerHTML = s.paypalUrl
-          ? '<p>'+t('amount')+': <b>'+tb.price+' '+esc(cur)+'</b></p><a class="btn btn-accent btn-block" target="_blank" rel="noopener" href="'+esc(s.paypalUrl)+'">🅿️ '+t('payPaypalBtn')+'</a>'
-          : '<p class="muted">PayPal غير مُفعّل بعد (أضف الرابط من لوحة التحكم).</p>';
+        if(s.paypalUrl){
+          pane.innerHTML='<p>'+t('amount')+': <b>'+tb.price+' '+esc(cur)+'</b></p>'+
+            '<a class="btn btn-accent btn-block" target="_blank" rel="noopener" href="'+esc(s.paypalUrl)+'">🅿️ '+t('payPaypalBtn')+'</a>'+
+            '<div class="qr-wrap" id="ppqr"></div><p class="muted" style="text-align:center">'+t('scanPay')+'</p>';
+          var pq=document.getElementById('ppqr'); if(pq){pq.innerHTML='';try{new QRCode(pq,{text:s.paypalUrl,width:150,height:150});}catch(e){pq.innerHTML='';}}
+        } else { pane.innerHTML='<p class="muted">PayPal غير مُفعّل بعد (أضف الرابط من لوحة التحكم).</p>'; }
       } else {
         var addr=s.usdtAddress||''; var net=s.usdtNetwork||'TRC20';
         pane.innerHTML='<p>'+t('amount')+': <b>'+tb.price+' USDT</b> · '+t('network')+': <span class="net-pill">'+esc(net)+'</span></p>'+

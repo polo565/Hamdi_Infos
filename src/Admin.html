@@ -115,8 +115,15 @@
       <label class="field">الروابط الرسمية</label>
       <div id="linksBox"></div>
       <button class="btn btn-ghost btn-sm" onclick="addLinkRow()">➕ إضافة رابط</button>
-      <label class="field" style="margin-top:14px">المحتوى (HTML بسيط)</label>
-      <textarea id="t_content"></textarea>
+      <label class="field" style="margin-top:14px">المحتوى (HTML بسيط) — متعدد اللغات</label>
+      <div class="pay-methods" id="clang" style="margin-bottom:8px">
+        <button type="button" data-l="ar" class="active">🇸🇦 العربية</button>
+        <button type="button" data-l="fr">🇫🇷 Français</button>
+        <button type="button" data-l="en">🇬🇧 English</button>
+      </div>
+      <textarea id="t_content_ar" dir="rtl"></textarea>
+      <textarea id="t_content_fr" dir="ltr" class="hidden"></textarea>
+      <textarea id="t_content_en" dir="ltr" class="hidden"></textarea>
       <div style="margin-top:14px;display:flex;gap:8px">
         <button class="btn btn-primary" onclick="saveTab()">💾 حفظ</button>
         <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
@@ -132,7 +139,14 @@
     function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
     function v(id){return document.getElementById(id).value;}
 
-    window.addEventListener('load',function(){var k;try{k=sessionStorage.getItem('admin_key');}catch(e){}if(k){KEY=k;loadData();}});
+    function setContentLang(l){
+      ['ar','fr','en'].forEach(function(x){document.getElementById('t_content_'+x).classList.toggle('hidden',x!==l);});
+      [].forEach.call(document.querySelectorAll('#clang button'),function(b){b.classList.toggle('active',b.getAttribute('data-l')===l);});
+    }
+    window.addEventListener('load',function(){
+      [].forEach.call(document.querySelectorAll('#clang button'),function(b){b.addEventListener('click',function(){setContentLang(b.getAttribute('data-l'));});});
+      var k;try{k=sessionStorage.getItem('admin_key');}catch(e){}if(k){KEY=k;loadData();}
+    });
     function doLogin(){var k=v('loginKey');google.script.run.withSuccessHandler(function(ok){if(ok){KEY=k;try{sessionStorage.setItem('admin_key',k);}catch(e){}loadData();}else document.getElementById('loginHint').textContent='❌ مفتاح غير صحيح.';}).adminLogin(k);}
     function logout(){KEY='';try{sessionStorage.removeItem('admin_key');}catch(e){}location.reload();}
     function loadData(){google.script.run.withSuccessHandler(onData).withFailureHandler(onFail).adminGetData(KEY);}
@@ -209,7 +223,11 @@
       document.getElementById('t_color').value=tb.color||'#0f766e';
       document.getElementById('t_desc').value=tb.desc||'';
       document.getElementById('t_price').value=tb.price||0;
-      document.getElementById('t_content').value=tb.content||'';
+      var c=tb.content||{}; if(typeof c==='string')c={ar:c,fr:'',en:''};
+      document.getElementById('t_content_ar').value=c.ar||'';
+      document.getElementById('t_content_fr').value=c.fr||'';
+      document.getElementById('t_content_en').value=c.en||'';
+      setContentLang('ar');
       renderLinks(tb.links||[]);
       document.getElementById('modal').classList.remove('hidden');
     }
@@ -238,7 +256,7 @@
     }
 
     function saveTab(){
-      var data={icon:v('t_icon')||'📄',title:v('t_title').trim()||'تبويب',color:v('t_color'),desc:v('t_desc'),price:Number(v('t_price'))||0,links:collectLinks(),content:v('t_content')};
+      var data={icon:v('t_icon')||'📄',title:v('t_title').trim()||'تبويب',color:v('t_color'),desc:v('t_desc'),price:Number(v('t_price'))||0,links:collectLinks(),content:{ar:v('t_content_ar'),fr:v('t_content_fr'),en:v('t_content_en')}};
       var done=function(d){closeModal();onData(d);toast('تم الحفظ ✓');};
       if(EDIT_ID)google.script.run.withSuccessHandler(done).withFailureHandler(onFail).adminUpdateTab(KEY,EDIT_ID,data);
       else google.script.run.withSuccessHandler(done).withFailureHandler(onFail).adminAddTab(KEY,data);
