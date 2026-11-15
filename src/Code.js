@@ -5,7 +5,7 @@
 
 var PROP = PropertiesService.getScriptProperties();
 var DEFAULT_ADMIN_KEY = 'admin';
-var SCHEMA = '6';
+var SCHEMA = '7';
 
 /* -------------------- Routage -------------------- */
 function doGet(e) {
@@ -310,6 +310,34 @@ function seedTabs_() {
           '<h4>2) I lost my documents</h4><ul><li>Report the loss (police report if possible).</li><li>The procedure can continue based on your account and any available copies; missing documents do not remove your right.</li><li>Do not contact your country\'s embassy if it puts you or your family at risk.</li></ul>' +
           '<h4>3) My claim was refused</h4><ul><li>You can appeal before the court within the deadline — <b>act fast</b>.</li><li>A re-examination is possible if new evidence appears.</li><li>Immediately seek free legal aid or a specialized lawyer.</li></ul>' +
           '<p class="muted">⏳ Deadlines are short and vary by country; do not delay, and seek legal help as soon as you receive any decision.</p>'
+      }
+    },
+    {
+      id: 'minors', icon: '🧒', color: '#0e7490', price: 0,
+      title: { ar: 'القُصّر غير المصحوبين', fr: 'Mineurs non accompagnés', en: 'Unaccompanied minors' },
+      desc: { ar: 'أطفال ومراهقون بمفردهم — حماية خاصة', fr: 'Enfants seuls — protection spéciale', en: 'Children alone — special protection' },
+      links: [L.unhcr, L.ofpra, L.frAsile, L.polIt, L.bamf, L.ind, L.cgrs, L.fedasil, L.interiorEs],
+      docs: [
+        D('أي وثيقة تثبت السن/الهوية إن وُجدت (شهادة ميلاد، جواز) — اختياري', 'Tout document prouvant l\'âge/identité si disponible (acte de naissance, passeport) — facultatif', 'Any proof of age/identity if available (birth certificate, passport) — optional'),
+        D('بيان مكتوب بقصتك', 'Récit écrit de votre histoire', 'Written account of your story'),
+        D('معلومات عن أي أقارب في أوروبا (للمّ الشمل)', 'Informations sur des proches en Europe (regroupement)', 'Details of any relatives in Europe (reunification)')
+      ],
+      content: {
+        ar: '<h3>القُصّر غير المصحوبين</h3><p>الطفل أو المراهق (أقل من 18 سنة) الذي يصل دون والديه أو ولي أمر قانوني يتمتع بـ<b>حماية خاصة</b> ولا يُعامل معاملة البالغين.</p>' +
+          '<div class="callout"><b>أخبر السلطات فوراً أنك قاصر.</b> من حقك الحصول على ممثّل/وصيّ قانوني، وإيواء مناسب، وتعليم ورعاية صحية، ومراعاة «المصلحة الفضلى للطفل» في كل قرار يخصّك.</div>' +
+          '<h4>خطوات أساسية</h4><ol><li>صرّح بأنك قاصر عند أول اتصال بالسلطات.</li><li>تُحال إلى مصالح حماية الطفولة.</li><li>يُعيَّن لك ممثّل/وصيّ قانوني يساعدك في الإجراءات.</li><li>قد يجري تقدير للسن — لك حقوق أثناءه، ويُمنح الشك لصالحك.</li><li>متابعة طلب اللجوء بمرافقة ودعم.</li></ol>' +
+          '<h4>حقوقك</h4><ul><li>عدم الاحتجاز كالبالغين؛ إيواء في مراكز مناسبة.</li><li>ممثّل/وصيّ قانوني، وتعليم ورعاية صحية.</li><li>البحث عن أفراد الأسرة ولمّ الشمل حيثما أمكن.</li></ul>' +
+          '<p class="muted">👨‍👩‍👧 إن كان لديك أقارب في أوروبا، أخبر السلطات — فقد يسمح ذلك بلمّ الشمل معهم.</p>',
+        fr: '<h3>Mineurs non accompagnés</h3><p>L\'enfant ou l\'adolescent (moins de 18 ans) qui arrive sans ses parents ni représentant légal bénéficie d\'une <b>protection spéciale</b> et n\'est pas traité comme un adulte.</p>' +
+          '<div class="callout"><b>Dites immédiatement aux autorités que vous êtes mineur.</b> Vous avez droit à un représentant/tuteur légal, à un hébergement adapté, à l\'éducation et aux soins, et à ce que « l\'intérêt supérieur de l\'enfant » soit pris en compte dans chaque décision.</div>' +
+          '<h4>Étapes essentielles</h4><ol><li>Déclarez être mineur dès le premier contact.</li><li>Vous êtes orienté vers la protection de l\'enfance.</li><li>Un représentant/tuteur légal vous est désigné.</li><li>Une évaluation de l\'âge est possible — vous avez des droits, et le doute vous profite.</li><li>Poursuite de la demande d\'asile avec accompagnement.</li></ol>' +
+          '<h4>Vos droits</h4><ul><li>Pas de détention comme les adultes ; hébergement adapté.</li><li>Représentant/tuteur, éducation et soins.</li><li>Recherche de la famille et regroupement si possible.</li></ul>' +
+          '<p class="muted">👨‍👩‍👧 Si vous avez des proches en Europe, dites-le aux autorités — un regroupement peut être possible.</p>',
+        en: '<h3>Unaccompanied minors</h3><p>A child or teenager (under 18) who arrives without parents or a legal guardian has <b>special protection</b> and is not treated like an adult.</p>' +
+          '<div class="callout"><b>Tell the authorities immediately that you are a minor.</b> You have the right to a legal representative/guardian, suitable accommodation, education and healthcare, and to have the “best interests of the child” considered in every decision.</div>' +
+          '<h4>Key steps</h4><ol><li>State you are a minor at first contact.</li><li>You are referred to child protection services.</li><li>A legal representative/guardian is appointed to help you.</li><li>An age assessment may take place — you have rights, and the benefit of the doubt applies.</li><li>The asylum claim continues with support.</li></ol>' +
+          '<h4>Your rights</h4><ul><li>No detention like adults; suitable accommodation.</li><li>Representative/guardian, education and healthcare.</li><li>Family tracing and reunification where possible.</li></ul>' +
+          '<p class="muted">👨‍👩‍👧 If you have relatives in Europe, tell the authorities — reunification may be possible.</p>'
       }
     },
     {
