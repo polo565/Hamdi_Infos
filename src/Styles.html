@@ -118,6 +118,28 @@
   .toast{position:fixed;bottom:18px;inset-inline-start:50%;transform:translateX(-50%);background:#142033;color:#fff;padding:10px 18px;border-radius:10px;font-size:.9rem;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s,bottom .25s;z-index:60;}
   .toast.show{opacity:1;bottom:28px;}
   .toast.err{background:#8a1c13;}
+  /* Welcome popup */
+  .modal-overlay{position:fixed;inset:0;background:rgba(10,20,35,.6);z-index:70;display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto;}
+  .modal-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:22px;max-width:460px;width:100%;}
+  .wl-head{font-size:1.3rem;font-weight:800;text-align:center;color:var(--primary-dark);}
+  .wl-sub{text-align:center;color:var(--muted);font-size:.86rem;margin:4px 0 16px;}
+  .wl-label{font-weight:700;font-size:.9rem;margin:14px 0 6px;}
+  .lang-pick{display:flex;gap:8px;}
+  .lang-pick button{flex:1;border:2px solid var(--border);background:#fff;border-radius:10px;padding:10px;cursor:pointer;font-weight:700;font-family:inherit;font-size:.92rem;}
+  .lang-pick button.active{border-color:var(--primary);background:#eefaf7;color:var(--primary-dark);}
+
+  .loc-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#eefaf7;border:1px solid #bfe6df;border-radius:12px;padding:8px 14px;margin:14px 0 2px;font-size:.9rem;flex-wrap:wrap;}
+
+  .docs-box{margin-top:18px;background:#f6f8fb;border:1px solid var(--border);border-radius:12px;padding:12px 16px;}
+  .docs-box h4{margin:0 0 8px;color:var(--primary-dark);}
+  .docs-list{list-style:none;padding:0;margin:0;}
+  .docs-list li{padding:7px 0 7px 26px;position:relative;border-bottom:1px solid #eef2f7;}
+  .docs-list li:last-child{border-bottom:0;}
+  .docs-list li::before{content:"📄";position:absolute;inset-inline-start:0;}
+  html[dir=rtl] .docs-list li{padding:7px 26px 7px 0;}
+  .c-tag{display:inline-block;background:#fff1d6;color:#9a6a0a;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:999px;margin-inline-start:6px;}
+  .link-row .c-tag{margin-inline-start:auto;}
+
   .footer{text-align:center;color:var(--muted);font-size:.85rem;padding:26px 0 36px;}
   .footer a{margin:0 8px;}
   .loading{text-align:center;padding:40px;color:var(--muted);}

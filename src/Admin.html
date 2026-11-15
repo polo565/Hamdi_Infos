@@ -132,9 +132,13 @@
       <label class="field">وصف قصير يظهر على البانر (باللغة المختارة)</label><input type="text" id="t_desc">
       <label class="field">المحتوى (HTML بسيط، باللغة المختارة)</label><textarea id="t_content"></textarea>
 
-      <label class="field" style="margin-top:14px">الروابط الرسمية (مشتركة لكل اللغات)</label>
+      <label class="field" style="margin-top:14px">🔗 الروابط الرسمية (اختر الدولة لكل رابط — 🌍 = كل الدول)</label>
       <div id="linksBox"></div>
       <button class="btn btn-ghost btn-sm" onclick="addLinkRow()">➕ إضافة رابط</button>
+
+      <label class="field" style="margin-top:14px">📎 الوثائق اللازمة (بثلاث لغات + الدولة)</label>
+      <div id="docsBox"></div>
+      <button class="btn btn-ghost btn-sm" onclick="addDocRow()">➕ إضافة وثيقة</button>
       <div style="margin-top:14px;display:flex;gap:8px">
         <button class="btn btn-primary" onclick="saveTab()">💾 حفظ</button>
         <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
@@ -227,7 +231,7 @@
           '<div class="orow"><span class="lbl">المبلغ</span> '+o.amount+' '+esc(o.currency)+' · '+methodTxt+'</div>'+
           '<div class="orow"><span class="lbl">التواصل</span> '+esc(o.contact)+'</div>'+
           '<div class="orow"><span class="lbl">TxID/مرجع</span> <span class="code-chip">'+esc(o.proof)+'</span></div>'+
-          '<div class="orow"><span class="lbl">الدولة</span> '+esc(o.country||'-')+'</div>'+
+          '<div class="orow"><span class="lbl">من ← إلى</span> '+esc(o.origin||'-')+' ← '+esc(o.current||'-')+'</div>'+
           (o.code?'<div class="orow"><span class="lbl">الرمز</span> <span class="code-chip">'+esc(o.code)+'</span> (أرسله للعميل)</div>':'')+
           '<div class="item-actions" style="margin-top:8px">'+
             (o.status==='pending'?'<button class="btn btn-success btn-sm" data-ap="'+o.id+'">✅ اعتماد + توليد رمز</button><button class="btn btn-danger btn-sm" data-rj="'+o.id+'">✖️ رفض</button>':'')+
@@ -276,28 +280,49 @@
       sel.value=CURLANG;
       loadLangFields(CURLANG);
       renderLinks(tb.links||[]);
+      renderDocs(tb.docs||[]);
       document.getElementById('modal').classList.remove('hidden');
     }
     function closeModal(){document.getElementById('modal').classList.add('hidden');EDIT_ID=null;}
 
+    function countryOpts(){var cs=(STATE.settings.countries||[]);var o='<option value="">🌍 كل الدول</option>';cs.forEach(function(c){o+='<option value="'+esc(c.code)+'">'+esc(c.code)+'</option>';});return o;}
     function renderLinks(links){
       var box=document.getElementById('linksBox');box.innerHTML='';
-      (links.length?links:[]).forEach(function(l){addLinkRow(l.label,l.url);});
+      (links||[]).forEach(function(l){addLinkRow(l.label,l.url,l.country);});
     }
-    function addLinkRow(label,url){
+    function addLinkRow(label,url,country){
       var box=document.getElementById('linksBox');
       var row=document.createElement('div');row.className='row';row.style.marginTop='6px';row.style.alignItems='center';
-      row.innerHTML='<input type="text" class="lk-label" placeholder="اسم الرابط" style="flex:1 1 140px"><input type="url" class="lk-url" placeholder="https://…" style="flex:2 1 200px"><button class="btn btn-danger btn-sm" style="flex:0 0 auto">✖</button>';
+      row.innerHTML='<input type="text" class="lk-label" placeholder="اسم الرابط" style="flex:1 1 130px"><input type="url" class="lk-url" placeholder="https://…" style="flex:2 1 170px"><select class="lk-country" style="flex:0 0 95px">'+countryOpts()+'</select><button class="btn btn-danger btn-sm" style="flex:0 0 auto">✖</button>';
       row.querySelector('.lk-label').value=label||'';
       row.querySelector('.lk-url').value=url||'';
+      row.querySelector('.lk-country').value=country||'';
       row.querySelector('button').onclick=function(){row.remove();};
       box.appendChild(row);
     }
     function collectLinks(){
       var out=[];
       document.querySelectorAll('#linksBox .row').forEach(function(r){
-        var label=r.querySelector('.lk-label').value.trim(),url=r.querySelector('.lk-url').value.trim();
-        if(label&&url)out.push({label:label,url:url});
+        var label=r.querySelector('.lk-label').value.trim(),url=r.querySelector('.lk-url').value.trim(),country=r.querySelector('.lk-country').value;
+        if(label&&url)out.push({label:label,url:url,country:country||''});
+      });
+      return out;
+    }
+    function renderDocs(docs){var box=document.getElementById('docsBox');box.innerHTML='';(docs||[]).forEach(function(d){var l=d.label||{};addDocRow(l.ar,l.fr,l.en,d.country);});}
+    function addDocRow(ar,fr,en,country){
+      var box=document.getElementById('docsBox');
+      var row=document.createElement('div');row.className='row';row.style.marginTop='6px';row.style.alignItems='center';
+      row.innerHTML='<input class="dc-ar" placeholder="عربي" dir="rtl" style="flex:1 1 110px"><input class="dc-fr" placeholder="Français" style="flex:1 1 110px"><input class="dc-en" placeholder="English" style="flex:1 1 110px"><select class="dc-country" style="flex:0 0 90px">'+countryOpts()+'</select><button class="btn btn-danger btn-sm" style="flex:0 0 auto">✖</button>';
+      row.querySelector('.dc-ar').value=ar||'';row.querySelector('.dc-fr').value=fr||'';row.querySelector('.dc-en').value=en||'';row.querySelector('.dc-country').value=country||'';
+      row.querySelector('button').onclick=function(){row.remove();};
+      box.appendChild(row);
+    }
+    function collectDocs(){
+      var out=[];
+      document.querySelectorAll('#docsBox .row').forEach(function(r){
+        var ar=r.querySelector('.dc-ar').value.trim(),fr=r.querySelector('.dc-fr').value.trim(),en=r.querySelector('.dc-en').value.trim(),country=r.querySelector('.dc-country').value;
+        var lab={};if(ar)lab.ar=ar;if(fr)lab.fr=fr;if(en)lab.en=en;
+        if(Object.keys(lab).length)out.push({label:lab,country:country||''});
       });
       return out;
     }
@@ -305,7 +330,7 @@
     function saveTab(){
       saveLangFields(CURLANG);
       var title=clean(EDIT.title); if(!Object.keys(title).length)title={ar:'تبويب'};
-      var data={icon:v('t_icon')||'📄',color:v('t_color'),price:Number(v('t_price'))||0,links:collectLinks(),title:title,desc:clean(EDIT.desc),content:clean(EDIT.content)};
+      var data={icon:v('t_icon')||'📄',color:v('t_color'),price:Number(v('t_price'))||0,links:collectLinks(),docs:collectDocs(),title:title,desc:clean(EDIT.desc),content:clean(EDIT.content)};
       var done=function(d){closeModal();onData(d);toast('تم الحفظ ✓');};
       if(EDIT_ID)google.script.run.withSuccessHandler(done).withFailureHandler(onFail).adminUpdateTab(KEY,EDIT_ID,data);
       else google.script.run.withSuccessHandler(done).withFailureHandler(onFail).adminAddTab(KEY,data);
