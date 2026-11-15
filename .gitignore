@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# clasp credentials — NE JAMAIS committer (contient tes tokens Google)
+.clasprc.json
+~/.clasprc.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

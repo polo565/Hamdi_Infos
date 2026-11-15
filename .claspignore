@@ -1,0 +1,7 @@
+# Fichiers à ne pas pousser vers Apps Script.
+# clasp ne pousse que ce qui est dans rootDir (src/), on ignore le reste par sécurité.
+**/**
+!appsscript.json
+!**/*.js
+!**/*.gs
+!**/*.html
