@@ -1,0 +1,47 @@
+name: Build Flutter apps (APK)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/**'
+      - '.github/workflows/flutter.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ visitor_app, admin_app ]
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Installer Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Préparer et construire ${{ matrix.app }}
+        working-directory: apps/${{ matrix.app }}
+        run: |
+          flutter --version
+          flutter create --platforms=android .
+          flutter pub get
+          dart run flutter_launcher_icons || true
+          flutter build apk --release
+
+      - name: Téléverser l'APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.app }}-apk
+          path: apps/${{ matrix.app }}/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error

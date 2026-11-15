@@ -12,3 +12,16 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# Flutter (dossiers générés par `flutter create` / build en CI)
+apps/**/.dart_tool/
+apps/**/.flutter-plugins
+apps/**/.flutter-plugins-dependencies
+apps/**/build/
+apps/**/pubspec.lock
+apps/**/android/
+apps/**/ios/
+apps/**/linux/
+apps/**/macos/
+apps/**/windows/
+apps/**/web/

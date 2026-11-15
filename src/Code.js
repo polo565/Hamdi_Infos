@@ -10,6 +10,16 @@ var SCHEMA = '9';
 /* -------------------- Routage -------------------- */
 function doGet(e) {
   seedIfEmpty_();
+  if (e && e.parameter && e.parameter.action) {
+    var out;
+    try {
+      var p = e.parameter;
+      var req = { action: p.action, id: p.id, code: p.code, key: p.key };
+      if (p.payload) { var extra = JSON.parse(p.payload); for (var k in extra) req[k] = extra[k]; }
+      out = handleApi_(req);
+    } catch (err) { out = { ok: false, error: String((err && err.message) || err) }; }
+    return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
+  }
   var page = ((e && e.parameter && e.parameter.page) || 'home').toLowerCase();
   var tpl = (page === 'admin') ? 'Admin' : 'Index';
   var title = (page === 'admin') ? 'لوحة التحكم' : (getSettings_().siteTitle || 'دليل اللاجئين');
@@ -19,6 +29,39 @@ function doGet(e) {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 function include(f) { return HtmlService.createHtmlOutputFromFile(f).getContent(); }
+
+/* -------------------- API JSON (pour les apps Flutter) -------------------- */
+function doPost(e) {
+  var out;
+  try { out = handleApi_(JSON.parse((e && e.postData && e.postData.contents) || '{}')); }
+  catch (err) { out = { ok: false, error: String((err && err.message) || err) }; }
+  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
+}
+function handleApi_(req) {
+  seedIfEmpty_();
+  var a = req.action;
+  switch (a) {
+    case 'getPublicData': return { ok: true, data: getPublicData() };
+    case 'getLockedContent': return { ok: true, data: getLockedContent(req.id, req.code) };
+    case 'createOrder': return { ok: true, data: createOrder(req.data || req) };
+    case 'adminLogin': return { ok: true, data: adminLogin(req.key) };
+    case 'adminGetData': return { ok: true, data: adminGetData(req.key) };
+    case 'adminAddTab': return { ok: true, data: adminAddTab(req.key, req.data) };
+    case 'adminUpdateTab': return { ok: true, data: adminUpdateTab(req.key, req.id, req.data) };
+    case 'adminDeleteTab': return { ok: true, data: adminDeleteTab(req.key, req.id) };
+    case 'adminReorder': return { ok: true, data: adminReorder(req.key, req.ids) };
+    case 'adminSaveSettings': return { ok: true, data: adminSaveSettings(req.key, req.settings) };
+    case 'adminChangeKey': return { ok: true, data: adminChangeKey(req.key, req.newKey) };
+    case 'adminAddCode': return { ok: true, data: adminAddCode(req.key, req.code, req.tabId) };
+    case 'adminDeleteCode': return { ok: true, data: adminDeleteCode(req.key, req.code) };
+    case 'adminApproveOrder': return { ok: true, data: adminApproveOrder(req.key, req.orderId) };
+    case 'adminRejectOrder': return { ok: true, data: adminRejectOrder(req.key, req.orderId) };
+    case 'adminDeleteOrder': return { ok: true, data: adminDeleteOrder(req.key, req.orderId) };
+    case 'adminCreateSubfolder': return { ok: true, data: adminCreateSubfolder(req.key, req.name) };
+    case 'adminDeleteSubfolder': return { ok: true, data: adminDeleteSubfolder(req.key, req.name) };
+    default: return { ok: false, error: 'UNKNOWN_ACTION' };
+  }
+}
 
 /* -------------------- Stockage -------------------- */
 function getSettings_() { var r = PROP.getProperty('SETTINGS'); return r ? JSON.parse(r) : defaultSettings_(); }
