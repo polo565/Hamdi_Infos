@@ -14,11 +14,7 @@
         <p id="siteSubtitle"></p>
       </div>
       <div class="header-actions">
-        <div class="lang-switch" id="langSwitch">
-          <button data-lang="ar">ع</button>
-          <button data-lang="fr">FR</button>
-          <button data-lang="en">EN</button>
-        </div>
+        <select class="lang-sel" id="langSel" aria-label="language"></select>
       </div>
     </div>
   </header>
@@ -54,16 +50,17 @@
       fr:{back:'Retour',loading:'Chargement…',free:'Gratuit',buy:'Obtenir l\'info',official:'Liens officiels',locked:'Contenu payant',haveCode:'J\'ai un code',enterCode:'Code d\'accès',unlock:'Débloquer',badCode:'Code invalide',unlocked:'Débloqué ✓',pay:'Moyen de paiement',payPaypal:'PayPal',payUsdt:'USDT (Bybit)',copy:'Copier',copied:'Copié ✓',amount:'Montant',network:'Réseau',afterPay:'Après paiement, remplissez ce formulaire pour recevoir votre code :',country:'Votre pays',contact:'Email ou WhatsApp',proof:'ID de transaction (TxID) / réf.',send:'Envoyer la demande',sent:'Demande reçue ✓ Nous vérifions et envoyons votre code.',fill:'Remplissez montant, contact et TxID.',payPaypalBtn:'Payer avec PayPal',openBybit:'Ouvrez Bybit et envoyez l\'USDT à cette adresse',scanPay:'Scannez pour payer',contactL:'Contact'},
       en:{back:'Back',loading:'Loading…',free:'Free',buy:'Get the info',official:'Official links',locked:'Paid content',haveCode:'I have a code',enterCode:'Access code',unlock:'Unlock',badCode:'Invalid code',unlocked:'Unlocked ✓',pay:'Payment method',payPaypal:'PayPal',payUsdt:'USDT (Bybit)',copy:'Copy',copied:'Copied ✓',amount:'Amount',network:'Network',afterPay:'After paying, fill this form to receive your code:',country:'Your country',contact:'Email or WhatsApp',proof:'Transaction ID (TxID) / ref',send:'Send request',sent:'Request received ✓ We will verify and send your code.',fill:'Fill amount, contact and TxID.',payPaypalBtn:'Pay with PayPal',openBybit:'Open Bybit and send USDT to this address',scanPay:'Scan to pay',contactL:'Contact'}
     };
-    function t(k){return (T[LANG]&&T[LANG][k])||T.ar[k]||k;}
-    function pick(o){if(!o)return '';if(typeof o==='string')return o;return o[LANG]||o.ar||o.fr||o.en||'';}
+    function t(k){return (T[LANG]&&T[LANG][k])||T.en[k]||T.ar[k]||k;}
+    function pick(o){if(!o)return '';if(typeof o==='string')return o;if(o[LANG])return o[LANG];var order=[LANG,'en','fr','ar'];for(var i=0;i<order.length;i++){if(o[order[i]])return o[order[i]];}for(var k in o){if(o[k])return o[k];}return '';}
+    function langDir(code){var ls=(DATA&&DATA.settings&&DATA.settings.languages)||[];var f=ls.filter(function(x){return x.code===code;})[0];return f?(f.dir||'ltr'):(code==='ar'?'rtl':'ltr');}
     function toast(m,e){var el=document.getElementById('toast');el.textContent=m;el.className='toast show'+(e?' err':'');setTimeout(function(){el.className='toast';},2600);}
     function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
     function setLang(l){
       LANG=l;
-      document.documentElement.setAttribute('dir',l==='ar'?'rtl':'ltr');
+      document.documentElement.setAttribute('dir',langDir(l));
       document.documentElement.setAttribute('lang',l);
-      [].forEach.call(document.querySelectorAll('#langSwitch button'),function(b){b.classList.toggle('active',b.getAttribute('data-lang')===l);});
+      var sel=document.getElementById('langSel'); if(sel&&sel.value!==l) sel.value=l;
       document.getElementById('backLbl').textContent=t('back');
       try{localStorage.setItem('guide_lang',l);}catch(e){}
       if(CURRENT) openTopic(CURRENT); else if(DATA) renderBanners();
@@ -71,11 +68,14 @@
 
     function init(){
       document.getElementById('year').textContent=new Date().getFullYear();
-      [].forEach.call(document.querySelectorAll('#langSwitch button'),function(b){b.addEventListener('click',function(){setLang(b.getAttribute('data-lang'));});});
+      document.getElementById('langSel').addEventListener('change',function(){setLang(this.value);});
       google.script.run.withSuccessHandler(onData).withFailureHandler(function(e){document.getElementById('loading').textContent='⚠️ '+e.message;}).getPublicData();
     }
     function onData(d){
       DATA=d; var s=d.settings||{};
+      var langs=s.languages||[{code:'ar',label:'العربية',dir:'rtl'}];
+      var sel=document.getElementById('langSel'); sel.innerHTML='';
+      langs.forEach(function(L){var op=document.createElement('option');op.value=L.code;op.textContent=L.label;sel.appendChild(op);});
       var saved; try{saved=localStorage.getItem('guide_lang');}catch(e){}
       setLang(saved||s.lang||'ar');
       document.getElementById('siteTitle').textContent=s.siteTitle||'';
@@ -100,7 +100,7 @@
         var badge=tb.locked?('<span class="badge">'+tb.price+' '+esc(cur)+'</span>'):('<span class="badge free">'+t('free')+'</span>');
         var el=document.createElement('button');
         el.className='banner';el.style.background='linear-gradient(135deg,'+tb.color+' 0%,'+shade(tb.color,-18)+' 100%)';
-        el.innerHTML='<div><div class="b-ic">'+(tb.icon||'')+'</div><div class="b-title">'+esc(tb.title)+'</div><div class="b-desc">'+esc(tb.desc||'')+'</div></div>'+
+        el.innerHTML='<div><div class="b-ic">'+(tb.icon||'')+'</div><div class="b-title">'+esc(pick(tb.title))+'</div><div class="b-desc">'+esc(pick(tb.desc))+'</div></div>'+
           '<div class="b-foot">'+badge+'<span class="arrow">◂</span></div>';
         el.addEventListener('click',function(){openTopic(tb.id);});
         g.appendChild(el);
@@ -139,7 +139,7 @@
       var s=DATA.settings||{}; var cur=s.currency||'€';
       var body=document.getElementById('topicBody');
       body.innerHTML=
-        '<div class="locked-head"><div class="big">🔒</div><h3>'+esc(tb.title)+' · '+t('locked')+'</h3>'+
+        '<div class="locked-head"><div class="big">🔒</div><h3>'+esc(pick(tb.title))+' · '+t('locked')+'</h3>'+
         '<p class="muted">'+esc(pick(tb.teaser)||'')+'…</p><div class="price-tag">'+tb.price+' '+esc(cur)+'</div></div>'+
         '<div class="pay-methods" id="pm">'+
           '<button data-m="paypal" class="active"><span class="pm-ic">🅿️</span>'+t('payPaypal')+'</button>'+
