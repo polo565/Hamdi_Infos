@@ -10,7 +10,7 @@
     <div class="wrap">
       <div class="brand">
         <h1>🛠️ لوحة التحكم <span style="font-size:.8rem;opacity:.85">Dashboard</span></h1>
-        <p>إدارة التبويبات، المحتوى، الأسعار، الدفع ورموز الوصول</p>
+        <p>التبويبات · الأسعار · الروابط · الدفع (PayPal / USDT) · الطلبات</p>
       </div>
       <div class="header-actions">
         <a class="btn btn-ghost btn-sm" href="?" target="_top">👁️ عرض الموقع</a>
@@ -20,7 +20,6 @@
   </header>
 
   <div class="wrap" style="padding-top:18px">
-
     <!-- LOGIN -->
     <section id="login" class="card" style="max-width:440px;margin:30px auto">
       <h2>🔐 تسجيل الدخول</h2>
@@ -31,54 +30,62 @@
     </section>
 
     <!-- APP -->
-    <main id="app" class="admin-grid hidden">
+    <main id="app" class="hidden">
+      <div id="defaultKeyWarn" class="disclaimer hidden">⚠️ أنت تستخدم المفتاح الافتراضي <b>admin</b>. غيّره فوراً من قسم «الأمان».</div>
 
-      <div id="defaultKeyWarn" class="disclaimer hidden">
-        ⚠️ أنت تستخدم المفتاح الافتراضي <b>admin</b>. غيّره فوراً من قسم «الأمان» بالأسفل.
+      <!-- ORDERS -->
+      <div class="card">
+        <h2>📨 الطلبات <span id="pendingCount" class="pill pending"></span></h2>
+        <div id="ordersList"></div>
       </div>
 
-      <!-- TABS MANAGER -->
+      <!-- TABS -->
       <div class="card">
-        <h2>📑 التبويبات <button class="btn btn-accent btn-sm" style="margin-inline-start:auto" onclick="openTabForm()">➕ إضافة تبويب</button></h2>
+        <h2>🎨 التبويبات (Banners) <button class="btn btn-accent btn-sm" style="margin-inline-start:auto" onclick="openTabForm()">➕ إضافة تبويب</button></h2>
         <div id="tabsList"></div>
       </div>
 
       <!-- SETTINGS -->
       <div class="card">
         <h2>⚙️ الإعدادات العامة</h2>
-        <label class="field">عنوان الموقع</label>
-        <input type="text" id="set_siteTitle">
-        <label class="field">العنوان الفرعي</label>
-        <input type="text" id="set_siteSubtitle">
+        <label class="field">عنوان الموقع</label><input type="text" id="set_siteTitle">
+        <label class="field">العنوان الفرعي</label><input type="text" id="set_siteSubtitle">
         <div class="row">
-          <div><label class="field">السعر</label><input type="text" id="set_price" placeholder="5"></div>
           <div><label class="field">العملة</label><input type="text" id="set_currency" placeholder="€"></div>
-          <div><label class="field">اللغة الافتراضية</label>
-            <select id="set_lang"><option value="ar">العربية</option><option value="fr">Français</option><option value="en">English</option></select>
-          </div>
+          <div><label class="field">اللغة الافتراضية</label><select id="set_lang"><option value="ar">العربية</option><option value="fr">Français</option><option value="en">English</option></select></div>
         </div>
-        <label class="field">رابط الدفع (Stripe / PayPal / Gumroad …)</label>
-        <input type="url" id="set_payUrl" placeholder="https://buy.stripe.com/...">
-        <div class="row">
-          <div><label class="field">نص زر الدفع</label><input type="text" id="set_payLabel"></div>
-          <div><label class="field">نص زر الدعم (الهيدر)</label><input type="text" id="set_supportLabel"></div>
-        </div>
+        <label class="field">تنويه قانوني</label><textarea id="set_disclaimer" style="min-height:70px"></textarea>
+        <label class="field">تنويه الروابط</label><textarea id="set_verifyNote" style="min-height:60px"></textarea>
         <div class="row">
           <div><label class="field">بريد التواصل</label><input type="email" id="set_contactEmail"></div>
-          <div><label class="field">رقم واتساب (دولي)</label><input type="text" id="set_whatsapp" placeholder="+39..."></div>
+          <div><label class="field">واتساب (دولي)</label><input type="text" id="set_whatsapp" placeholder="+39…"></div>
         </div>
-        <label class="field">تنويه قانوني (يظهر أسفل كل صفحة)</label>
-        <textarea id="set_disclaimer" style="min-height:80px"></textarea>
         <div style="margin-top:14px"><button class="btn btn-primary" onclick="saveSettings()">💾 حفظ الإعدادات</button></div>
       </div>
 
-      <!-- ACCESS CODES -->
+      <!-- PAYMENT -->
       <div class="card">
-        <h2>🎟️ رموز الوصول (للمحتوى المميز)</h2>
-        <p class="muted">أنشئ رموزاً وسلّمها للمستخدم بعد الدفع ليفتح بها التبويبات المقفلة 🔒.</p>
+        <h2>💳 إعدادات الدفع</h2>
+        <label class="field">🅿️ رابط PayPal (PayPal.me أو زر دفع)</label>
+        <input type="url" id="set_paypalUrl" placeholder="https://paypal.me/...">
+        <div class="row">
+          <div style="flex:2 1 260px"><label class="field">₮ عنوان محفظة USDT (من تطبيق Bybit)</label><input type="text" id="set_usdtAddress" placeholder="عنوان المحفظة"></div>
+          <div><label class="field">الشبكة</label>
+            <select id="set_usdtNetwork"><option>TRC20</option><option>ERC20</option><option>BEP20</option><option>Polygon</option></select>
+          </div>
+        </div>
+        <label class="field">تعليمات الدفع بـ USDT (تظهر للعميل)</label>
+        <textarea id="set_usdtNote" style="min-height:60px"></textarea>
+        <div style="margin-top:14px"><button class="btn btn-primary" onclick="savePay()">💾 حفظ إعدادات الدفع</button></div>
+      </div>
+
+      <!-- CODES -->
+      <div class="card">
+        <h2>🎟️ رموز الوصول</h2>
+        <p class="muted">تُنشأ تلقائياً عند اعتماد طلب. يمكنك أيضاً إنشاء رمز يدوياً.</p>
         <div class="row" style="align-items:flex-end">
-          <div><label class="field">رمز مخصّص (أو اتركه فارغاً للتوليد التلقائي)</label><input type="text" id="newCode" placeholder="تلقائي"></div>
-          <div style="flex:0 0 auto"><button class="btn btn-accent" onclick="addCode()">➕ إنشاء رمز</button></div>
+          <div><label class="field">رمز مخصّص (أو فارغ = تلقائي)</label><input type="text" id="newCode" placeholder="تلقائي"></div>
+          <div style="flex:0 0 auto"><button class="btn btn-accent" onclick="addCode()">➕ إنشاء</button></div>
         </div>
         <div id="codesList" style="margin-top:12px"></div>
       </div>
@@ -88,25 +95,27 @@
         <h2>🔒 الأمان — تغيير مفتاح المدير</h2>
         <div class="row" style="align-items:flex-end">
           <div><label class="field">المفتاح الجديد (4 أحرف على الأقل)</label><input type="password" id="newKey"></div>
-          <div style="flex:0 0 auto"><button class="btn btn-primary" onclick="changeKey()">تغيير المفتاح</button></div>
+          <div style="flex:0 0 auto"><button class="btn btn-primary" onclick="changeKey()">تغيير</button></div>
         </div>
       </div>
-
     </main>
   </div>
 
-  <!-- TAB EDIT MODAL -->
-  <div id="modal" class="hidden" style="position:fixed;inset:0;background:rgba(10,20,35,.5);z-index:40;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow:auto">
-    <div class="card" style="max-width:640px;width:100%;margin-top:20px">
+  <!-- TAB MODAL -->
+  <div id="modal" class="hidden" style="position:fixed;inset:0;background:rgba(10,20,35,.5);z-index:40;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow:auto">
+    <div class="card" style="max-width:660px;width:100%;margin-top:16px">
       <h2 id="modalTitle">تعديل التبويب</h2>
       <div class="row">
-        <div style="flex:0 0 90px"><label class="field">الأيقونة</label><input type="text" id="t_icon" placeholder="📄" maxlength="4"></div>
-        <div><label class="field">اسم التبويب</label><input type="text" id="t_title"></div>
+        <div style="flex:0 0 80px"><label class="field">أيقونة</label><input type="text" id="t_icon" maxlength="4" placeholder="📄"></div>
+        <div><label class="field">الاسم</label><input type="text" id="t_title"></div>
+        <div style="flex:0 0 90px"><label class="field">اللون</label><input type="color" id="t_color" style="height:42px;padding:3px"></div>
       </div>
-      <label class="field" style="display:flex;align-items:center;gap:8px;cursor:pointer">
-        <input type="checkbox" id="t_locked" style="width:auto"> 🔒 محتوى مميز (يتطلب دفعاً + رمز وصول)
-      </label>
-      <label class="field">المحتوى (يدعم HTML بسيط: &lt;h3&gt; &lt;p&gt; &lt;ul&gt; &lt;li&gt; &lt;b&gt;)</label>
+      <label class="field">وصف قصير (يظهر على البانر)</label><input type="text" id="t_desc">
+      <label class="field">السعر (0 = مجاني، أكبر من 0 = مدفوع 🔒)</label><input type="number" id="t_price" min="0" step="1" value="0">
+      <label class="field">الروابط الرسمية</label>
+      <div id="linksBox"></div>
+      <button class="btn btn-ghost btn-sm" onclick="addLinkRow()">➕ إضافة رابط</button>
+      <label class="field" style="margin-top:14px">المحتوى (HTML بسيط)</label>
       <textarea id="t_content"></textarea>
       <div style="margin-top:14px;display:flex;gap:8px">
         <button class="btn btn-primary" onclick="saveTab()">💾 حفظ</button>
@@ -118,160 +127,155 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    var KEY = '';
-    var STATE = null;
-    var EDIT_ID = null;
+    var KEY='',STATE=null,EDIT_ID=null;
+    function toast(m,e){var el=document.getElementById('toast');el.textContent=m;el.className='toast show'+(e?' err':'');setTimeout(function(){el.className='toast';},2800);}
+    function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+    function v(id){return document.getElementById(id).value;}
 
-    function toast(msg, err){
-      var el = document.getElementById('toast');
-      el.textContent = msg; el.className = 'toast show' + (err ? ' err' : '');
-      setTimeout(function(){ el.className = 'toast'; }, 2800);
-    }
-    function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
-
-    window.addEventListener('load', function(){
-      var saved; try { saved = sessionStorage.getItem('admin_key'); } catch(e){}
-      if (saved) { KEY = saved; loadData(); }
-    });
-
-    function doLogin(){
-      var k = document.getElementById('loginKey').value;
-      google.script.run.withSuccessHandler(function(ok){
-        if (ok) { KEY = k; try{ sessionStorage.setItem('admin_key', k); }catch(e){} loadData(); }
-        else { document.getElementById('loginHint').textContent = '❌ مفتاح غير صحيح.'; }
-      }).adminLogin(k);
-    }
-    function logout(){ KEY=''; try{ sessionStorage.removeItem('admin_key'); }catch(e){} location.reload(); }
-
-    function loadData(){
-      google.script.run.withSuccessHandler(onData).withFailureHandler(onFail).adminGetData(KEY);
-    }
-    function onFail(e){
-      if (/UNAUTHORIZED/.test(e.message)) { logout(); return; }
-      toast('خطأ: ' + e.message, true);
-    }
-    function onData(data){
-      STATE = data;
+    window.addEventListener('load',function(){var k;try{k=sessionStorage.getItem('admin_key');}catch(e){}if(k){KEY=k;loadData();}});
+    function doLogin(){var k=v('loginKey');google.script.run.withSuccessHandler(function(ok){if(ok){KEY=k;try{sessionStorage.setItem('admin_key',k);}catch(e){}loadData();}else document.getElementById('loginHint').textContent='❌ مفتاح غير صحيح.';}).adminLogin(k);}
+    function logout(){KEY='';try{sessionStorage.removeItem('admin_key');}catch(e){}location.reload();}
+    function loadData(){google.script.run.withSuccessHandler(onData).withFailureHandler(onFail).adminGetData(KEY);}
+    function onFail(e){if(/UNAUTHORIZED/.test(e.message)){logout();return;}toast('خطأ: '+e.message,true);}
+    function onData(d){
+      STATE=d;
       document.getElementById('login').classList.add('hidden');
       document.getElementById('app').classList.remove('hidden');
       document.getElementById('logoutBtn').classList.remove('hidden');
-      document.getElementById('defaultKeyWarn').classList.toggle('hidden', !data.adminKeyIsDefault);
-      fillSettings(data.settings);
-      renderTabs(data.tabs);
-      renderCodes(data.codes);
+      document.getElementById('defaultKeyWarn').classList.toggle('hidden',!d.adminKeyIsDefault);
+      fillSettings(d.settings);
+      renderOrders(d.orders||[]);
+      renderTabs(d.tabs||[]);
+      renderCodes(d.codes||[]);
     }
 
-    /* ----- Tabs ----- */
-    function renderTabs(tabs){
-      var box = document.getElementById('tabsList');
-      box.innerHTML = '';
-      tabs.forEach(function(tb, i){
-        var el = document.createElement('div');
-        el.className = 'list-item';
-        el.innerHTML =
-          '<div class="meta"><span style="font-size:1.1rem">'+esc(tb.icon)+'</span>'+
-          '<span class="t-title">'+esc(tb.title)+'</span>'+
-          (tb.locked?'<span class="pill lock">🔒 مميز</span>':'')+'</div>'+
-          '<div class="item-actions">'+
-            '<button class="btn btn-ghost btn-sm" '+(i===0?'disabled':'')+' data-up="'+tb.id+'">▲</button>'+
-            '<button class="btn btn-ghost btn-sm" '+(i===tabs.length-1?'disabled':'')+' data-down="'+tb.id+'">▼</button>'+
-            '<button class="btn btn-ghost btn-sm" data-edit="'+tb.id+'">✏️ تعديل</button>'+
-            '<button class="btn btn-danger btn-sm" data-del="'+tb.id+'">🗑️</button>'+
+    /* ORDERS */
+    function renderOrders(orders){
+      var pend=orders.filter(function(o){return o.status==='pending';}).length;
+      document.getElementById('pendingCount').textContent=pend?('قيد المراجعة: '+pend):'';
+      var box=document.getElementById('ordersList');
+      if(!orders.length){box.innerHTML='<p class="muted">لا توجد طلبات بعد.</p>';return;}
+      box.innerHTML='';
+      orders.forEach(function(o){
+        var el=document.createElement('div');el.className='order-card';
+        var methodTxt=o.method==='usdt'?'USDT (Bybit)':'PayPal';
+        el.innerHTML=
+          '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">'+
+            '<b>'+esc(o.tabTitle)+'</b><span class="pill '+o.status+'">'+o.status+'</span></div>'+
+          '<div class="orow"><span class="lbl">المبلغ</span> '+o.amount+' '+esc(o.currency)+' · '+methodTxt+'</div>'+
+          '<div class="orow"><span class="lbl">التواصل</span> '+esc(o.contact)+'</div>'+
+          '<div class="orow"><span class="lbl">TxID/مرجع</span> <span class="code-chip">'+esc(o.proof)+'</span></div>'+
+          '<div class="orow"><span class="lbl">الدولة</span> '+esc(o.country||'-')+'</div>'+
+          (o.code?'<div class="orow"><span class="lbl">الرمز</span> <span class="code-chip">'+esc(o.code)+'</span> (أرسله للعميل)</div>':'')+
+          '<div class="item-actions" style="margin-top:8px">'+
+            (o.status==='pending'?'<button class="btn btn-success btn-sm" data-ap="'+o.id+'">✅ اعتماد + توليد رمز</button><button class="btn btn-danger btn-sm" data-rj="'+o.id+'">✖️ رفض</button>':'')+
+            '<button class="btn btn-ghost btn-sm" data-dl="'+o.id+'">🗑️</button>'+
           '</div>';
         box.appendChild(el);
       });
-      box.querySelectorAll('[data-edit]').forEach(function(b){ b.onclick=function(){ openTabForm(b.getAttribute('data-edit')); }; });
-      box.querySelectorAll('[data-del]').forEach(function(b){ b.onclick=function(){ delTab(b.getAttribute('data-del')); }; });
-      box.querySelectorAll('[data-up]').forEach(function(b){ b.onclick=function(){ move(b.getAttribute('data-up'),-1); }; });
-      box.querySelectorAll('[data-down]').forEach(function(b){ b.onclick=function(){ move(b.getAttribute('data-down'),1); }; });
+      box.querySelectorAll('[data-ap]').forEach(function(b){b.onclick=function(){act('adminApproveOrder',b.getAttribute('data-ap'),'تم الاعتماد ✓');};});
+      box.querySelectorAll('[data-rj]').forEach(function(b){b.onclick=function(){act('adminRejectOrder',b.getAttribute('data-rj'),'تم الرفض');};});
+      box.querySelectorAll('[data-dl]').forEach(function(b){b.onclick=function(){if(confirm('حذف الطلب؟'))act('adminDeleteOrder',b.getAttribute('data-dl'),'تم الحذف');};});
     }
+    function act(fn,id,msg){google.script.run.withSuccessHandler(function(d){onData(d);toast(msg);}).withFailureHandler(onFail)[fn](KEY,id);}
 
-    function openTabForm(id){
-      EDIT_ID = id || null;
-      var tb = id ? STATE.tabs.filter(function(x){return x.id===id;})[0] : { icon:'📄', title:'', locked:false, content:'' };
-      document.getElementById('modalTitle').textContent = id ? 'تعديل التبويب' : 'تبويب جديد';
-      document.getElementById('t_icon').value = tb.icon || '';
-      document.getElementById('t_title').value = tb.title || '';
-      document.getElementById('t_locked').checked = !!tb.locked;
-      document.getElementById('t_content').value = tb.content || '';
-      document.getElementById('modal').classList.remove('hidden');
-    }
-    function closeModal(){ document.getElementById('modal').classList.add('hidden'); EDIT_ID=null; }
-
-    function saveTab(){
-      var data = {
-        icon: document.getElementById('t_icon').value || '📄',
-        title: document.getElementById('t_title').value.trim() || 'تبويب',
-        locked: document.getElementById('t_locked').checked,
-        content: document.getElementById('t_content').value
-      };
-      var fn = EDIT_ID
-        ? function(){ google.script.run.withSuccessHandler(afterTab).withFailureHandler(onFail).adminUpdateTab(KEY, EDIT_ID, data); }
-        : function(){ google.script.run.withSuccessHandler(afterTab).withFailureHandler(onFail).adminAddTab(KEY, data); };
-      fn();
-    }
-    function afterTab(data){ closeModal(); onData(data); toast('تم الحفظ ✓'); }
-
-    function delTab(id){
-      if (!confirm('حذف هذا التبويب نهائياً؟')) return;
-      google.script.run.withSuccessHandler(function(d){ onData(d); toast('تم الحذف'); }).withFailureHandler(onFail).adminDeleteTab(KEY, id);
-    }
-    function move(id, dir){
-      var ids = STATE.tabs.map(function(t){return t.id;});
-      var i = ids.indexOf(id); var j = i + dir;
-      if (j<0 || j>=ids.length) return;
-      ids.splice(i,1); ids.splice(j,0,id);
-      google.script.run.withSuccessHandler(function(d){ onData(d); }).withFailureHandler(onFail).adminReorder(KEY, ids);
-    }
-
-    /* ----- Settings ----- */
-    function fillSettings(s){
-      var f=['siteTitle','siteSubtitle','price','currency','payUrl','payLabel','supportLabel','contactEmail','whatsapp','disclaimer'];
-      f.forEach(function(k){ var el=document.getElementById('set_'+k); if(el) el.value=s[k]||''; });
-      document.getElementById('set_lang').value = s.lang || 'ar';
-    }
-    function saveSettings(){
-      var s = {
-        siteTitle: v('set_siteTitle'), siteSubtitle: v('set_siteSubtitle'),
-        price: v('set_price'), currency: v('set_currency'), lang: v('set_lang'),
-        payUrl: v('set_payUrl'), payLabel: v('set_payLabel'), supportLabel: v('set_supportLabel'),
-        contactEmail: v('set_contactEmail'), whatsapp: v('set_whatsapp'), disclaimer: v('set_disclaimer')
-      };
-      google.script.run.withSuccessHandler(function(d){ onData(d); toast('تم حفظ الإعدادات ✓'); }).withFailureHandler(onFail).adminSaveSettings(KEY, s);
-    }
-    function v(id){ return document.getElementById(id).value; }
-
-    /* ----- Codes ----- */
-    function renderCodes(codes){
-      var box = document.getElementById('codesList');
-      if (!codes.length) { box.innerHTML = '<p class="muted">لا توجد رموز بعد.</p>'; return; }
-      box.innerHTML = '';
-      codes.forEach(function(c){
-        var el = document.createElement('div');
-        el.className = 'list-item';
-        el.innerHTML = '<div class="meta"><span class="code-chip">'+esc(c.code)+'</span></div>'+
-          '<button class="btn btn-danger btn-sm" data-del="'+esc(c.code)+'">🗑️ حذف</button>';
+    /* TABS */
+    function renderTabs(tabs){
+      var box=document.getElementById('tabsList');box.innerHTML='';
+      tabs.forEach(function(tb,i){
+        var el=document.createElement('div');el.className='list-item';
+        var price=tb.price>0?('<span class="pill price">'+tb.price+' '+esc(STATE.settings.currency||'€')+'</span>'):'<span class="pill free">مجاني</span>';
+        el.innerHTML='<div class="meta"><span class="swatch" style="background:'+esc(tb.color)+'"></span><span style="font-size:1.1rem">'+esc(tb.icon)+'</span><span class="t-title">'+esc(tb.title)+'</span>'+price+'</div>'+
+          '<div class="item-actions">'+
+            '<button class="btn btn-ghost btn-sm" '+(i===0?'disabled':'')+' data-up="'+tb.id+'">▲</button>'+
+            '<button class="btn btn-ghost btn-sm" '+(i===tabs.length-1?'disabled':'')+' data-down="'+tb.id+'">▼</button>'+
+            '<button class="btn btn-ghost btn-sm" data-edit="'+tb.id+'">✏️</button>'+
+            '<button class="btn btn-danger btn-sm" data-del="'+tb.id+'">🗑️</button></div>';
         box.appendChild(el);
       });
-      box.querySelectorAll('[data-del]').forEach(function(b){ b.onclick=function(){
-        google.script.run.withSuccessHandler(function(d){ onData(d); toast('تم حذف الرمز'); }).withFailureHandler(onFail).adminDeleteCode(KEY, b.getAttribute('data-del'));
-      };});
+      box.querySelectorAll('[data-edit]').forEach(function(b){b.onclick=function(){openTabForm(b.getAttribute('data-edit'));};});
+      box.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){if(confirm('حذف هذا التبويب؟'))google.script.run.withSuccessHandler(function(d){onData(d);toast('تم الحذف');}).withFailureHandler(onFail).adminDeleteTab(KEY,b.getAttribute('data-del'));};});
+      box.querySelectorAll('[data-up]').forEach(function(b){b.onclick=function(){move(b.getAttribute('data-up'),-1);};});
+      box.querySelectorAll('[data-down]').forEach(function(b){b.onclick=function(){move(b.getAttribute('data-down'),1);};});
     }
-    function addCode(){
-      var c = document.getElementById('newCode').value;
-      google.script.run.withSuccessHandler(function(d){ document.getElementById('newCode').value=''; onData(d); toast('تم إنشاء الرمز ✓'); }).withFailureHandler(onFail).adminAddCode(KEY, c);
+    function move(id,dir){var ids=STATE.tabs.map(function(t){return t.id;});var i=ids.indexOf(id),j=i+dir;if(j<0||j>=ids.length)return;ids.splice(i,1);ids.splice(j,0,id);google.script.run.withSuccessHandler(onData).withFailureHandler(onFail).adminReorder(KEY,ids);}
+
+    function openTabForm(id){
+      EDIT_ID=id||null;
+      var tb=id?STATE.tabs.filter(function(x){return x.id===id;})[0]:{icon:'📄',title:'',color:'#0f766e',desc:'',price:0,links:[],content:''};
+      document.getElementById('modalTitle').textContent=id?'تعديل التبويب':'تبويب جديد';
+      document.getElementById('t_icon').value=tb.icon||'';
+      document.getElementById('t_title').value=tb.title||'';
+      document.getElementById('t_color').value=tb.color||'#0f766e';
+      document.getElementById('t_desc').value=tb.desc||'';
+      document.getElementById('t_price').value=tb.price||0;
+      document.getElementById('t_content').value=tb.content||'';
+      renderLinks(tb.links||[]);
+      document.getElementById('modal').classList.remove('hidden');
+    }
+    function closeModal(){document.getElementById('modal').classList.add('hidden');EDIT_ID=null;}
+
+    function renderLinks(links){
+      var box=document.getElementById('linksBox');box.innerHTML='';
+      (links.length?links:[]).forEach(function(l){addLinkRow(l.label,l.url);});
+    }
+    function addLinkRow(label,url){
+      var box=document.getElementById('linksBox');
+      var row=document.createElement('div');row.className='row';row.style.marginTop='6px';row.style.alignItems='center';
+      row.innerHTML='<input type="text" class="lk-label" placeholder="اسم الرابط" style="flex:1 1 140px"><input type="url" class="lk-url" placeholder="https://…" style="flex:2 1 200px"><button class="btn btn-danger btn-sm" style="flex:0 0 auto">✖</button>';
+      row.querySelector('.lk-label').value=label||'';
+      row.querySelector('.lk-url').value=url||'';
+      row.querySelector('button').onclick=function(){row.remove();};
+      box.appendChild(row);
+    }
+    function collectLinks(){
+      var out=[];
+      document.querySelectorAll('#linksBox .row').forEach(function(r){
+        var label=r.querySelector('.lk-label').value.trim(),url=r.querySelector('.lk-url').value.trim();
+        if(label&&url)out.push({label:label,url:url});
+      });
+      return out;
     }
 
-    /* ----- Security ----- */
-    function changeKey(){
-      var nk = document.getElementById('newKey').value;
-      if (nk.length < 4) { toast('المفتاح قصير جداً', true); return; }
-      google.script.run.withSuccessHandler(function(){
-        document.getElementById('newKey').value='';
-        KEY = nk; try{ sessionStorage.setItem('admin_key', nk); }catch(e){}
-        toast('تم تغيير المفتاح ✓'); loadData();
-      }).withFailureHandler(onFail).adminChangeKey(KEY, nk);
+    function saveTab(){
+      var data={icon:v('t_icon')||'📄',title:v('t_title').trim()||'تبويب',color:v('t_color'),desc:v('t_desc'),price:Number(v('t_price'))||0,links:collectLinks(),content:v('t_content')};
+      var done=function(d){closeModal();onData(d);toast('تم الحفظ ✓');};
+      if(EDIT_ID)google.script.run.withSuccessHandler(done).withFailureHandler(onFail).adminUpdateTab(KEY,EDIT_ID,data);
+      else google.script.run.withSuccessHandler(done).withFailureHandler(onFail).adminAddTab(KEY,data);
     }
+
+    /* SETTINGS */
+    function fillSettings(s){
+      ['siteTitle','siteSubtitle','currency','contactEmail','whatsapp','disclaimer','verifyNote','paypalUrl','usdtAddress','usdtNote'].forEach(function(k){var el=document.getElementById('set_'+k);if(el)el.value=s[k]||'';});
+      document.getElementById('set_lang').value=s.lang||'ar';
+      document.getElementById('set_usdtNetwork').value=s.usdtNetwork||'TRC20';
+    }
+    function saveSettings(){
+      var s={siteTitle:v('set_siteTitle'),siteSubtitle:v('set_siteSubtitle'),currency:v('set_currency'),lang:v('set_lang'),contactEmail:v('set_contactEmail'),whatsapp:v('set_whatsapp'),disclaimer:v('set_disclaimer'),verifyNote:v('set_verifyNote')};
+      google.script.run.withSuccessHandler(function(d){onData(d);toast('تم حفظ الإعدادات ✓');}).withFailureHandler(onFail).adminSaveSettings(KEY,s);
+    }
+    function savePay(){
+      var s={paypalUrl:v('set_paypalUrl'),usdtAddress:v('set_usdtAddress').trim(),usdtNetwork:v('set_usdtNetwork'),usdtNote:v('set_usdtNote')};
+      google.script.run.withSuccessHandler(function(d){onData(d);toast('تم حفظ إعدادات الدفع ✓');}).withFailureHandler(onFail).adminSaveSettings(KEY,s);
+    }
+
+    /* CODES */
+    function renderCodes(codes){
+      var box=document.getElementById('codesList');
+      if(!codes.length){box.innerHTML='<p class="muted">لا توجد رموز.</p>';return;}
+      box.innerHTML='';
+      codes.forEach(function(c){
+        var tabName=c.tabId?((STATE.tabs.filter(function(t){return t.id===c.tabId;})[0]||{}).title||c.tabId):'كل المحتوى';
+        var el=document.createElement('div');el.className='list-item';
+        el.innerHTML='<div class="meta"><span class="code-chip">'+esc(c.code)+'</span><span class="pill">'+esc(tabName)+'</span></div><button class="btn btn-danger btn-sm" data-del="'+esc(c.code)+'">🗑️</button>';
+        box.appendChild(el);
+      });
+      box.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){google.script.run.withSuccessHandler(function(d){onData(d);toast('تم الحذف');}).withFailureHandler(onFail).adminDeleteCode(KEY,b.getAttribute('data-del'));};});
+    }
+    function addCode(){var c=v('newCode');google.script.run.withSuccessHandler(function(d){document.getElementById('newCode').value='';onData(d);toast('تم الإنشاء ✓');}).withFailureHandler(onFail).adminAddCode(KEY,c,'');}
+
+    /* SECURITY */
+    function changeKey(){var nk=v('newKey');if(nk.length<4){toast('المفتاح قصير',true);return;}google.script.run.withSuccessHandler(function(){document.getElementById('newKey').value='';KEY=nk;try{sessionStorage.setItem('admin_key',nk);}catch(e){}toast('تم التغيير ✓');loadData();}).withFailureHandler(onFail).adminChangeKey(KEY,nk);}
   </script>
 </body>
 </html>
