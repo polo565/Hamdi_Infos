@@ -61,6 +61,9 @@
           <div><label class="field">بريد التواصل</label><input type="email" id="set_contactEmail"></div>
           <div><label class="field">واتساب (دولي)</label><input type="text" id="set_whatsapp" placeholder="+39…"></div>
         </div>
+        <label class="field">📁 مجلد Drive الرئيسي للوثائق (تتفرّع منه مجلدات لكل باب)</label>
+        <input type="url" id="set_docsRootFolder" placeholder="https://drive.google.com/drive/folders/...">
+        <p class="muted" style="font-size:.78rem;margin-top:4px">شارِك المجلد كـ «أي شخص لديه الرابط — عارض». ثم من «تعديل» كل باب تنشئ مجلده الفرعي وترفع إليه الوثائق على Drive، فتظهر تلقائياً في الموقع.</p>
         <div style="margin-top:14px"><button class="btn btn-primary" onclick="saveSettings()">💾 حفظ الإعدادات</button></div>
       </div>
 
@@ -131,15 +134,36 @@
       </div>
       <label class="field">اسم التبويب (باللغة المختارة)</label><input type="text" id="t_title">
       <label class="field">وصف قصير يظهر على البانر (باللغة المختارة)</label><input type="text" id="t_desc">
-      <label class="field">المحتوى (HTML بسيط، باللغة المختارة)</label><textarea id="t_content"></textarea>
+      <label class="field">📝 المحتوى (اكتب وتنسّق بسهولة — مثل كتابة note)</label>
+      <div class="rte-bar" id="rteBar">
+        <button type="button" data-cmd="bold" title="عريض"><b>B</b></button>
+        <button type="button" data-cmd="h3" title="عنوان">H3</button>
+        <button type="button" data-cmd="h4" title="عنوان فرعي">H4</button>
+        <button type="button" data-cmd="p" title="فقرة">¶</button>
+        <button type="button" data-cmd="ul" title="قائمة نقطية">•</button>
+        <button type="button" data-cmd="ol" title="قائمة مرقّمة">1.</button>
+        <button type="button" data-cmd="link" title="رابط">🔗</button>
+        <button type="button" data-cmd="clear" title="إزالة التنسيق">⌫</button>
+      </div>
+      <div id="t_content" class="rte" contenteditable="true"></div>
 
       <label class="field" style="margin-top:14px">🔗 الروابط الرسمية (اختر الدولة لكل رابط — 🌍 = كل الدول)</label>
       <div id="linksBox"></div>
       <button class="btn btn-ghost btn-sm" onclick="addLinkRow()">➕ إضافة رابط</button>
 
-      <label class="field" style="margin-top:14px">📎 الوثائق اللازمة (بثلاث لغات + الدولة)</label>
+      <label class="field" style="margin-top:14px">📎 الوثائق اللازمة — نص (ع/FR/EN) + رابط Drive اختياري لكل وثيقة</label>
       <div id="docsBox"></div>
       <button class="btn btn-ghost btn-sm" onclick="addDocRow()">➕ إضافة وثيقة</button>
+      <label class="field" style="margin-top:14px">📁 مجلد هذا الباب على Drive (داخل المجلد الرئيسي) — تظهر ملفاته تلقائياً كوثائق</label>
+      <div class="row" style="align-items:center">
+        <input type="text" id="t_docsSubfolder" placeholder="اسم المجلد الفرعي (يُطابق اسم الباب تلقائياً)" style="flex:1 1 170px">
+        <button type="button" class="btn btn-success btn-sm" style="flex:0 0 auto" onclick="createSubfolder()">📁 إنشاء/فتح</button>
+        <button type="button" class="btn btn-danger btn-sm" style="flex:0 0 auto" onclick="deleteSubfolder()">🗑️ حذف المجلد</button>
+      </div>
+      <div id="subfolderInfo" class="muted" style="font-size:.8rem;margin-top:4px"></div>
+      <label class="field" style="margin-top:10px">أو رابط مجلد مباشر (بديل، اختياري)</label>
+      <input type="text" id="t_docsFolder" placeholder="https://drive.google.com/drive/folders/...">
+      <p class="muted" style="font-size:.78rem;margin-top:4px">شارِك المجلد/الملفات كـ «أي شخص لديه الرابط — عارض» حتى يفتحها الزوّار.</p>
       <div style="margin-top:14px;display:flex;gap:8px">
         <button class="btn btn-primary" onclick="saveTab()">💾 حفظ</button>
         <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
@@ -162,19 +186,31 @@
     (function(){var th;try{th=localStorage.getItem('guide_theme');}catch(e){}if(!th)th=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';document.documentElement.setAttribute('data-theme',th);})();
     window.addEventListener('load',function(){
       document.getElementById('t_lang').addEventListener('change',function(){saveLangFields(CURLANG);CURLANG=this.value;loadLangFields(CURLANG);});
+      [].forEach.call(document.querySelectorAll('#rteBar button'),function(b){b.addEventListener('mousedown',function(e){e.preventDefault();});b.addEventListener('click',function(){rteCmd(b.getAttribute('data-cmd'));});});
       var k;try{k=sessionStorage.getItem('admin_key');}catch(e){}if(k){KEY=k;loadData();}
     });
     function loadLangFields(lang){
       document.getElementById('t_title').value=EDIT.title[lang]||'';
       document.getElementById('t_desc').value=EDIT.desc[lang]||'';
-      document.getElementById('t_content').value=EDIT.content[lang]||'';
+      document.getElementById('t_content').innerHTML=EDIT.content[lang]||'';
       var dir=((( STATE.settings.languages||[]).filter(function(x){return x.code===lang;})[0]||{}).dir)||(lang==='ar'?'rtl':'ltr');
       ['t_title','t_desc','t_content'].forEach(function(id){document.getElementById(id).setAttribute('dir',dir);});
     }
     function saveLangFields(lang){
       EDIT.title[lang]=document.getElementById('t_title').value;
       EDIT.desc[lang]=document.getElementById('t_desc').value;
-      EDIT.content[lang]=document.getElementById('t_content').value;
+      EDIT.content[lang]=document.getElementById('t_content').innerHTML;
+    }
+    function rteCmd(c){
+      document.getElementById('t_content').focus();
+      if(c==='bold')document.execCommand('bold');
+      else if(c==='h3')document.execCommand('formatBlock',false,'H3');
+      else if(c==='h4')document.execCommand('formatBlock',false,'H4');
+      else if(c==='p')document.execCommand('formatBlock',false,'P');
+      else if(c==='ul')document.execCommand('insertUnorderedList');
+      else if(c==='ol')document.execCommand('insertOrderedList');
+      else if(c==='link'){var u=prompt('رابط URL:','https://');if(u)document.execCommand('createLink',false,u);}
+      else if(c==='clear')document.execCommand('removeFormat');
     }
     function doLogin(){var k=v('loginKey');google.script.run.withSuccessHandler(function(ok){if(ok){KEY=k;try{sessionStorage.setItem('admin_key',k);}catch(e){}loadData();}else document.getElementById('loginHint').textContent='❌ مفتاح غير صحيح.';}).adminLogin(k);}
     function logout(){KEY='';try{sessionStorage.removeItem('admin_key');}catch(e){}location.reload();}
@@ -284,6 +320,9 @@
       loadLangFields(CURLANG);
       renderLinks(tb.links||[]);
       renderDocs(tb.docs||[]);
+      document.getElementById('t_docsFolder').value=tb.docsFolder||'';
+      document.getElementById('t_docsSubfolder').value=tb.docsSubfolder||'';
+      document.getElementById('subfolderInfo').innerHTML='';LAST_SUB_URL='';
       document.getElementById('modal').classList.remove('hidden');
     }
     function closeModal(){document.getElementById('modal').classList.add('hidden');EDIT_ID=null;}
@@ -311,29 +350,48 @@
       });
       return out;
     }
-    function renderDocs(docs){var box=document.getElementById('docsBox');box.innerHTML='';(docs||[]).forEach(function(d){var l=d.label||{};addDocRow(l.ar,l.fr,l.en,d.country);});}
-    function addDocRow(ar,fr,en,country){
+    function renderDocs(docs){var box=document.getElementById('docsBox');box.innerHTML='';(docs||[]).forEach(function(d){var l=d.label||{};addDocRow(l.ar,l.fr,l.en,d.country,d.fileUrl);});}
+    function addDocRow(ar,fr,en,country,fileUrl){
       var box=document.getElementById('docsBox');
       var row=document.createElement('div');row.className='row';row.style.marginTop='6px';row.style.alignItems='center';
-      row.innerHTML='<input class="dc-ar" placeholder="عربي" dir="rtl" style="flex:1 1 110px"><input class="dc-fr" placeholder="Français" style="flex:1 1 110px"><input class="dc-en" placeholder="English" style="flex:1 1 110px"><select class="dc-country" style="flex:0 0 90px">'+countryOpts()+'</select><button class="btn btn-danger btn-sm" style="flex:0 0 auto">✖</button>';
-      row.querySelector('.dc-ar').value=ar||'';row.querySelector('.dc-fr').value=fr||'';row.querySelector('.dc-en').value=en||'';row.querySelector('.dc-country').value=country||'';
+      row.innerHTML='<input class="dc-ar" placeholder="عربي" dir="rtl" style="flex:1 1 90px"><input class="dc-fr" placeholder="Français" style="flex:1 1 90px"><input class="dc-en" placeholder="English" style="flex:1 1 90px"><input class="dc-url" placeholder="🔗 رابط Drive (اختياري)" style="flex:2 1 150px"><select class="dc-country" style="flex:0 0 80px">'+countryOpts()+'</select><button class="btn btn-danger btn-sm" style="flex:0 0 auto">✖</button>';
+      row.querySelector('.dc-ar').value=ar||'';row.querySelector('.dc-fr').value=fr||'';row.querySelector('.dc-en').value=en||'';row.querySelector('.dc-url').value=fileUrl||'';row.querySelector('.dc-country').value=country||'';
       row.querySelector('button').onclick=function(){row.remove();};
       box.appendChild(row);
     }
     function collectDocs(){
       var out=[];
       document.querySelectorAll('#docsBox .row').forEach(function(r){
-        var ar=r.querySelector('.dc-ar').value.trim(),fr=r.querySelector('.dc-fr').value.trim(),en=r.querySelector('.dc-en').value.trim(),country=r.querySelector('.dc-country').value;
+        var ar=r.querySelector('.dc-ar').value.trim(),fr=r.querySelector('.dc-fr').value.trim(),en=r.querySelector('.dc-en').value.trim(),url=r.querySelector('.dc-url').value.trim(),country=r.querySelector('.dc-country').value;
         var lab={};if(ar)lab.ar=ar;if(fr)lab.fr=fr;if(en)lab.en=en;
-        if(Object.keys(lab).length)out.push({label:lab,country:country||''});
+        var item={label:lab,country:country||''};if(url)item.fileUrl=url;
+        if(Object.keys(lab).length||url)out.push(item);
       });
       return out;
+    }
+
+    var LAST_SUB_URL='';
+    function subName(){ return v('t_docsSubfolder').trim() || mlp(EDIT.title) || v('t_title').trim(); }
+    function createSubfolder(){
+      var name=subName(); if(!name){toast('أدخل اسماً أو عنوان الباب أولاً',true);return;}
+      var info=document.getElementById('subfolderInfo'); info.textContent='⏳ ...';
+      google.script.run.withSuccessHandler(function(res){
+        document.getElementById('t_docsSubfolder').value=res.name; LAST_SUB_URL=res.url;
+        info.innerHTML='✅ <a href="'+esc(res.url)+'" target="_blank">افتح المجلد على Drive وارفع إليه الوثائق</a>';
+        try{window.open(res.url,'_blank');}catch(e){}
+        toast('المجلد جاهز ✓');
+      }).withFailureHandler(function(e){var m=/NO_ROOT/.test(e.message)?'عيّن «المجلد الرئيسي» أولاً من الإعدادات واحفظه':(/NO_NAME/.test(e.message)?'أدخل اسماً':e.message);info.textContent='❌ '+m;toast(m,true);}).adminCreateSubfolder(KEY,name);
+    }
+    function deleteSubfolder(){
+      var name=subName(); if(!name)return;
+      if(!confirm('حذف المجلد الفرعي «'+name+'» وكل محتواه من Drive؟'))return;
+      google.script.run.withSuccessHandler(function(){document.getElementById('subfolderInfo').textContent='🗑️ تم حذف المجلد.';LAST_SUB_URL='';toast('تم الحذف');}).withFailureHandler(onFail).adminDeleteSubfolder(KEY,name);
     }
 
     function saveTab(){
       saveLangFields(CURLANG);
       var title=clean(EDIT.title); if(!Object.keys(title).length)title={ar:'تبويب'};
-      var data={icon:v('t_icon')||'📄',color:v('t_color'),price:Number(v('t_price'))||0,links:collectLinks(),docs:collectDocs(),title:title,desc:clean(EDIT.desc),content:clean(EDIT.content)};
+      var data={icon:v('t_icon')||'📄',color:v('t_color'),price:Number(v('t_price'))||0,links:collectLinks(),docs:collectDocs(),docsFolder:v('t_docsFolder').trim(),docsSubfolder:v('t_docsSubfolder').trim(),title:title,desc:clean(EDIT.desc),content:clean(EDIT.content)};
       var done=function(d){closeModal();onData(d);toast('تم الحفظ ✓');};
       if(EDIT_ID)google.script.run.withSuccessHandler(done).withFailureHandler(onFail).adminUpdateTab(KEY,EDIT_ID,data);
       else google.script.run.withSuccessHandler(done).withFailureHandler(onFail).adminAddTab(KEY,data);
@@ -341,12 +399,12 @@
 
     /* SETTINGS */
     function fillSettings(s){
-      ['siteTitle','siteSubtitle','currency','contactEmail','whatsapp','disclaimer','verifyNote','paypalUrl','usdtAddress','usdtNote'].forEach(function(k){var el=document.getElementById('set_'+k);if(el)el.value=s[k]||'';});
+      ['siteTitle','siteSubtitle','currency','contactEmail','whatsapp','disclaimer','verifyNote','docsRootFolder','paypalUrl','usdtAddress','usdtNote'].forEach(function(k){var el=document.getElementById('set_'+k);if(el)el.value=s[k]||'';});
       document.getElementById('set_lang').value=s.lang||'ar';
       document.getElementById('set_usdtNetwork').value=s.usdtNetwork||'TRC20';
     }
     function saveSettings(){
-      var s={siteTitle:v('set_siteTitle'),siteSubtitle:v('set_siteSubtitle'),currency:v('set_currency'),lang:v('set_lang'),contactEmail:v('set_contactEmail'),whatsapp:v('set_whatsapp'),disclaimer:v('set_disclaimer'),verifyNote:v('set_verifyNote')};
+      var s={siteTitle:v('set_siteTitle'),siteSubtitle:v('set_siteSubtitle'),currency:v('set_currency'),lang:v('set_lang'),contactEmail:v('set_contactEmail'),whatsapp:v('set_whatsapp'),disclaimer:v('set_disclaimer'),verifyNote:v('set_verifyNote'),docsRootFolder:v('set_docsRootFolder').trim()};
       google.script.run.withSuccessHandler(function(d){onData(d);toast('تم حفظ الإعدادات ✓');}).withFailureHandler(onFail).adminSaveSettings(KEY,s);
     }
     function savePay(){

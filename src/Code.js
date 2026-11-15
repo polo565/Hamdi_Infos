@@ -59,11 +59,12 @@ function teaserObj_(c) { var out = {}; if (c && typeof c === 'object') for (var 
 function getPublicData() {
   seedIfEmpty_();
   var s = getSettings_();
+  var subMap = getRootSubfolders_();
   var tabs = getTabsMeta_().sort(function (a, b) { return a.order - b.order; }).map(function (t) {
     var locked = (Number(t.price) || 0) > 0;
     var o = { id: t.id, title: toMl_(t.title), desc: toMl_(t.desc), icon: t.icon || '', color: t.color || '#0f766e', price: Number(t.price) || 0, locked: locked, links: t.links || [] };
     var c = getContentObj_(t.id);
-    o.docs = t.docs || [];                 // أسماء الوثائق تظهر كمعاينة حتى للمحتوى المدفوع
+    o.docs = buildDocs_(t, subMap);        // وثائق يدوية + ملفات مجلد Drive (تظهر كمعاينة حتى للمدفوع)
     if (locked) { o.teaser = teaserObj_(c); }
     else { o.content = c; }
     return o;
@@ -83,7 +84,7 @@ function getPublicData() {
 function getLockedContent(id, code) {
   if (!validCodeForTab_(code, id)) return { ok: false };
   var t = getTabsMeta_().filter(function (x) { return x.id === id; })[0];
-  return { ok: true, content: getContentObj_(id), links: (t && t.links) || [], docs: (t && t.docs) || [] };
+  return { ok: true, content: getContentObj_(id), links: (t && t.links) || [], docs: t ? buildDocs_(t) : [] };
 }
 
 function createOrder(data) {
@@ -117,7 +118,7 @@ function adminLogin(k) { return String(k) === getAdminKey_(); }
 function adminGetData(key) {
   assertAdmin_(key);
   var tabs = getTabsMeta_().sort(function (a, b) { return a.order - b.order; }).map(function (t) {
-    return { id: t.id, title: toMl_(t.title), desc: toMl_(t.desc), icon: t.icon || '', color: t.color || '#0f766e', price: Number(t.price) || 0, links: t.links || [], docs: t.docs || [], content: getContentObj_(t.id) };
+    return { id: t.id, title: toMl_(t.title), desc: toMl_(t.desc), icon: t.icon || '', color: t.color || '#0f766e', price: Number(t.price) || 0, links: t.links || [], docs: t.docs || [], docsFolder: t.docsFolder || '', docsSubfolder: t.docsSubfolder || '', content: getContentObj_(t.id) };
   });
   var s = getSettings_();
   if (!s.languages) s.languages = defaultLanguages_();
@@ -134,7 +135,7 @@ function adminAddTab(key, d) {
   var tabs = getTabsMeta_();
   var id = 't' + Date.now().toString(36) + Math.floor(Math.random() * 1000);
   var order = tabs.length ? Math.max.apply(null, tabs.map(function (t) { return t.order; })) + 1 : 0;
-  tabs.push({ id: id, title: cleanMl_((d && d.title) || { ar: 'تبويب جديد' }), desc: cleanMl_((d && d.desc) || {}), icon: (d && d.icon) || '📄', color: (d && d.color) || '#0f766e', price: Number(d && d.price) || 0, links: (d && d.links) || [], docs: (d && d.docs) || [], order: order });
+  tabs.push({ id: id, title: cleanMl_((d && d.title) || { ar: 'تبويب جديد' }), desc: cleanMl_((d && d.desc) || {}), icon: (d && d.icon) || '📄', color: (d && d.color) || '#0f766e', price: Number(d && d.price) || 0, links: (d && d.links) || [], docs: (d && d.docs) || [], docsFolder: (d && d.docsFolder) || '', docsSubfolder: (d && d.docsSubfolder) || '', order: order });
   saveTabsMeta_(tabs);
   setContentObj_(id, (d && d.content) || {});
   return adminGetData(key);
@@ -152,6 +153,8 @@ function adminUpdateTab(key, id, d) {
   if (d.price != null) t.price = Number(d.price) || 0;
   if (d.links != null) t.links = d.links;
   if (d.docs != null) t.docs = d.docs;
+  if (d.docsFolder != null) t.docsFolder = d.docsFolder;
+  if (d.docsSubfolder != null) t.docsSubfolder = d.docsSubfolder;
   saveTabsMeta_(tabs);
   if (d.content != null) setContentObj_(id, d.content);
   return adminGetData(key);
@@ -190,6 +193,93 @@ function adminDeleteOrder(key, orderId) { assertAdmin_(key); saveOrders_(getOrde
 
 function genCode_() { var s = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', o = ''; for (var i = 0; i < 8; i++) o += s.charAt(Math.floor(Math.random() * s.length)); return o; }
 
+/* -------------------- Google Drive (les documents viennent DE Drive) -------------------- */
+// يستخرج معرّف ملف/مجلد من رابط Drive أو من المعرّف المباشر.
+function extractDriveId_(s) { s = String(s || ''); var m = s.match(/[-\w]{25,}/); return m ? m[0] : ''; }
+
+// يحوّل ملفات مجلد إلى وثائق (الاسم + رابط العرض).
+function folderFilesList_(folder) {
+  var out = [];
+  try {
+    var it = folder.getFiles(); var n = 0;
+    while (it.hasNext() && n < 60) {
+      var f = it.next(); n++;
+      var nm = f.getName();
+      out.push({ label: { ar: nm, fr: nm, en: nm }, country: '', fileUrl: f.getUrl(), auto: true });
+    }
+  } catch (e) {}
+  return out;
+}
+function folderDocs_(ref) {
+  var id = extractDriveId_(ref);
+  if (!id) return [];
+  try { return folderFilesList_(DriveApp.getFolderById(id)); } catch (e) { return []; }
+}
+
+// يسرد المجلدات الفرعية داخل المجلد الرئيسي مرّة واحدة: اسم → مجلد.
+function getRootSubfolders_() {
+  var ref = getSettings_().docsRootFolder;
+  var id = extractDriveId_(ref);
+  var map = {};
+  if (!id) return map;
+  try {
+    var it = DriveApp.getFolderById(id).getFolders(); var n = 0;
+    while (it.hasNext() && n < 100) { var f = it.next(); n++; map[f.getName()] = f; }
+  } catch (e) {}
+  return map;
+}
+
+// يحدّد المجلد الفرعي المناسب للباب: رابط مباشر، أو اسم محدّد، أو مطابقة تلقائية باسم الباب.
+function autoDocsForTab_(t, subMap) {
+  if (t.docsFolder) return folderDocs_(t.docsFolder);
+  if (!subMap) return [];
+  if (t.docsSubfolder && subMap[t.docsSubfolder]) return folderFilesList_(subMap[t.docsSubfolder]);
+  var tt = toMl_(t.title), names = [];
+  for (var k in tt) if (tt[k]) names.push(tt[k]);
+  names.push(t.id);
+  for (var i = 0; i < names.length; i++) if (subMap[names[i]]) return folderFilesList_(subMap[names[i]]);
+  return [];
+}
+
+// الوثائق = اليدوية (بروابط Drive) + ملفات مجلد Drive (مباشر أو مجلد فرعي مطابق للباب).
+function buildDocs_(t, subMap) {
+  return (t.docs || []).concat(autoDocsForTab_(t, subMap === undefined ? getRootSubfolders_() : subMap));
+}
+
+// ينشئ (أو يعيد) مجلداً فرعياً باسم معيّن داخل المجلد الرئيسي، ويشاركه بالرابط.
+function adminCreateSubfolder(key, name) {
+  assertAdmin_(key);
+  var rootId = extractDriveId_(getSettings_().docsRootFolder);
+  if (!rootId) throw new Error('NO_ROOT');
+  var root = DriveApp.getFolderById(rootId);
+  name = String(name || '').trim();
+  if (!name) throw new Error('NO_NAME');
+  var it = root.getFoldersByName(name);
+  var folder = it.hasNext() ? it.next() : root.createFolder(name);
+  try { folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+  return { name: name, url: folder.getUrl(), id: folder.getId() };
+}
+// يحذف (ينقل إلى سلّة المهملات) مجلداً فرعياً بالاسم داخل المجلد الرئيسي.
+function adminDeleteSubfolder(key, name) {
+  assertAdmin_(key);
+  var rootId = extractDriveId_(getSettings_().docsRootFolder);
+  if (!rootId) throw new Error('NO_ROOT');
+  var it = DriveApp.getFolderById(rootId).getFoldersByName(String(name || ''));
+  if (it.hasNext()) it.next().setTrashed(true);
+  return true;
+}
+// يعيد رابط المجلد الرئيسي إن وُجد (أو ينشئه إن مرّر name).
+function adminGetRootInfo(key) {
+  assertAdmin_(key);
+  var id = extractDriveId_(getSettings_().docsRootFolder);
+  if (!id) return { ok: false };
+  try { var f = DriveApp.getFolderById(id); return { ok: true, name: f.getName(), url: f.getUrl() }; }
+  catch (e) { return { ok: false, error: String(e) }; }
+}
+
+// تشغيلها مرّة واحدة من محرّر Apps Script لمنح إذن Drive (قراءة/كتابة).
+function authorizeDrive() { DriveApp.getRootFolder().getName(); return 'OK — Drive autorisé'; }
+
 /* -------------------- Langues + Pays -------------------- */
 function defaultLanguages_() {
   return [
@@ -216,6 +306,7 @@ function defaultSettings_() {
     siteTitle: 'دليل اللاجئين والمهاجرين',
     siteSubtitle: 'معلومات موثوقة وروابط رسمية لطالبي اللجوء والمقيمين في أوروبا',
     currency: '€', lang: 'ar', languages: defaultLanguages_(), countries: defaultCountries_(),
+    docsRootFolder: '',
     paypalUrl: '', usdtAddress: '', usdtNetwork: 'TRC20',
     usdtNote: 'افتح تطبيق Bybit ← Assets ← Withdraw، الصق العنوان، اختر الشبكة الصحيحة، ثم أرسل المبلغ.',
     contactEmail: '', whatsapp: '', supportLabel: 'دعم المشروع',
