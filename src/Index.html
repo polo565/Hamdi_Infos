@@ -37,6 +37,7 @@
         <p id="siteSubtitle"></p>
       </div>
       <div class="header-actions">
+        <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()" aria-label="theme" title="Dark / Light"><span class="tt-track"><span class="tt-ic">☀️</span><span class="tt-ic">🌙</span><span class="tt-knob"></span></span></button>
         <select class="lang-sel" id="langSel" aria-label="language"></select>
       </div>
     </div>
@@ -92,7 +93,11 @@
       if(CURRENT) openTopic(CURRENT); else if(DATA) renderBanners();
     }
 
+    function toggleTheme(){var cur=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',cur);try{localStorage.setItem('guide_theme',cur);}catch(e){}}
+    function initTheme(){var th;try{th=localStorage.getItem('guide_theme');}catch(e){}if(!th)th=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';document.documentElement.setAttribute('data-theme',th);}
+    function hexA(hex,a){try{var n=parseInt(hex.slice(1),16);return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';}catch(e){return hex;}}
     function init(){
+      initTheme();
       document.getElementById('year').textContent=new Date().getFullYear();
       document.getElementById('langSel').addEventListener('change',function(){setLang(this.value);});
       [].forEach.call(document.querySelectorAll('#wlLang button'),function(b){b.addEventListener('click',function(){setPopLang(b.getAttribute('data-l'));});});
@@ -169,9 +174,11 @@
         var cur=(DATA.settings.currency||'€');
         var badge=tb.locked?('<span class="badge">'+tb.price+' '+esc(cur)+'</span>'):('<span class="badge free">'+t('free')+'</span>');
         var el=document.createElement('button');
-        el.className='banner';el.style.background='linear-gradient(135deg,'+tb.color+' 0%,'+shade(tb.color,-18)+' 100%)';
-        el.innerHTML='<div><div class="b-ic">'+(tb.icon||'')+'</div><div class="b-title">'+esc(pick(tb.title))+'</div><div class="b-desc">'+esc(pick(tb.desc))+'</div></div>'+
-          '<div class="b-foot">'+badge+'<span class="arrow">◂</span></div>';
+        el.className='banner';
+        el.style.background='linear-gradient(135deg,'+shade(tb.color,10)+' 0%,'+shade(tb.color,-22)+' 100%)';
+        el.style.boxShadow='0 9px 22px '+hexA(tb.color,.45)+', inset 0 1px 0 rgba(255,255,255,.35)';
+        el.innerHTML='<span class="b-left"><span class="b-ic">'+(tb.icon||'')+'</span><span class="b-txt"><span class="b-title">'+esc(pick(tb.title))+'</span><span class="b-desc">'+esc(pick(tb.desc))+'</span></span></span>'+
+          '<span class="b-right">'+badge+'<span class="arrow">◂</span></span>';
         el.addEventListener('click',function(){openTopic(tb.id);});
         g.appendChild(el);
       });
