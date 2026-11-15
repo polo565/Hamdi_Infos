@@ -219,12 +219,21 @@
       return out;
     }
 
+    function docsPreview(tb){
+      var dd=(tb.docs||[]).filter(function(x){return matchCountry(x.country);});
+      if(!dd.length) return '';
+      var out='<div class="docs-box"><h4>📎 '+t('docs')+'</h4><ul class="docs-list">';
+      dd.forEach(function(x){out+='<li>'+esc(pick(x.label))+(x.country?' <span class="c-tag">'+esc(countryLabel(x.country))+'</span>':'')+'</li>';});
+      out+='</ul></div>';
+      return out;
+    }
     function renderCheckout(tb){
       var s=DATA.settings||{}; var cur=s.currency||'€';
       var body=document.getElementById('topicBody');
       body.innerHTML=
         '<div class="locked-head"><div class="big">🔒</div><h3>'+esc(pick(tb.title))+' · '+t('locked')+'</h3>'+
         '<p class="muted">'+esc(pick(tb.teaser)||'')+'…</p><div class="price-tag">'+tb.price+' '+esc(cur)+'</div></div>'+
+        docsPreview(tb)+
         '<div class="pay-methods" id="pm">'+
           '<button data-m="paypal" class="active"><span class="pm-ic">🅿️</span>PayPal</button>'+
           '<button data-m="usdt"><span class="pm-ic">₮</span>USDT (Bybit)</button>'+

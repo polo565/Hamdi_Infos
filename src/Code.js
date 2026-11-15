@@ -5,7 +5,7 @@
 
 var PROP = PropertiesService.getScriptProperties();
 var DEFAULT_ADMIN_KEY = 'admin';
-var SCHEMA = '7';
+var SCHEMA = '8';
 
 /* -------------------- Routage -------------------- */
 function doGet(e) {
@@ -63,8 +63,9 @@ function getPublicData() {
     var locked = (Number(t.price) || 0) > 0;
     var o = { id: t.id, title: toMl_(t.title), desc: toMl_(t.desc), icon: t.icon || '', color: t.color || '#0f766e', price: Number(t.price) || 0, locked: locked, links: t.links || [] };
     var c = getContentObj_(t.id);
+    o.docs = t.docs || [];                 // أسماء الوثائق تظهر كمعاينة حتى للمحتوى المدفوع
     if (locked) { o.teaser = teaserObj_(c); }
-    else { o.content = c; o.docs = t.docs || []; }
+    else { o.content = c; }
     return o;
   });
   return {
@@ -416,8 +417,14 @@ function seedTabs_() {
       desc: { ar: 'ملف شامل: الوثائق، النماذج، العناوين، ونصائح المقابلة', fr: 'Documents, modèles, adresses, entretien', en: 'Documents, forms, addresses, interview' },
       links: allAuth,
       docs: [
-        D('قائمة الوثائق الكاملة لكل حالة', 'Liste complète des documents', 'Full document checklist'),
-        D('نماذج وطلبات جاهزة', 'Modèles et demandes prêts', 'Ready-made forms')
+        D('جواز السفر أو أي إثبات هوية', 'Passeport ou pièce d\'identité', 'Passport or any ID'),
+        D('صور شخصية حديثة', 'Photos d\'identité récentes', 'Recent ID photos'),
+        D('إثبات العنوان/الإيواء', 'Justificatif de domicile/hébergement', 'Proof of address/accommodation'),
+        D('بيان مكتوب مفصّل بقصتك وأسباب الفرار', 'Récit écrit détaillé de votre parcours', 'Detailed written account of your story'),
+        D('أي أدلة تدعم الطلب (صور، تقارير، شهادات)', 'Preuves à l\'appui (photos, rapports, attestations)', 'Supporting evidence (photos, reports, certificates)'),
+        D('نماذج وطلبات جاهزة حسب حالتك', 'Modèles et demandes prêts selon votre cas', 'Ready-made forms for your case'),
+        D('نموذج C3', 'Formulaire C3', 'C3 form', 'IT'),
+        D('شهادة إيواء/عنوان عبر SPADA', 'Attestation de domiciliation (SPADA)', 'Address certificate (SPADA)', 'FR')
       ],
       content: {
         ar: '<h3>الدليل الكامل خطوة بخطوة</h3><p>محتوى مفصّل يشرح كل خطوة مع قائمة الوثائق الكاملة لكل حالة، نماذج جاهزة، عناوين المكاتب الرسمية، وكيفية الاستعداد للمقابلة وماذا تفعل عند الرفض (الطعن).</p><h4>يشمل</h4><ul><li>قائمة الوثائق الكاملة لكل حالة.</li><li>نماذج وطلبات جاهزة.</li><li>عناوين الجهات الرسمية.</li><li>الاستعداد للمقابلة.</li><li>إجراءات الطعن عند الرفض.</li></ul>',
