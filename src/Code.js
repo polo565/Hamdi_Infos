@@ -5,7 +5,7 @@
 
 var PROP = PropertiesService.getScriptProperties();
 var DEFAULT_ADMIN_KEY = 'admin';
-var SCHEMA = '5';
+var SCHEMA = '6';
 
 /* -------------------- Routage -------------------- */
 function doGet(e) {
@@ -281,6 +281,35 @@ function seedTabs_() {
         ar: '<h3>من هو طالب اللجوء؟</h3><p>شخص غادر بلده بسبب خطر على حياته أو حريته (حرب، اضطهاد، عنف) ويطلب الحماية الدولية في بلد أوروبي.</p><div class="callout"><b>هل دخلت دون أوراق قانونية؟</b> هذا لا يمنعك من طلب اللجوء. وفق اتفاقية جنيف 1951 (المادة 31)، لا يجوز معاقبة اللاجئ على الدخول أو التواجد غير النظامي، بشرط أن تتقدّم إلى السلطات في أقرب وقت وتشرح بصدق أسباب فرارك. أحضر أي وثيقة هوية إن توفّرت — وغيابها لا يُسقط حقك في الحماية.</div><h4>الخطوات الأساسية</h4><ol><li>التوجّه فور الوصول إلى الجهة المختصة وطلب الحماية الدولية.</li><li>التسجيل وأخذ البصمات.</li><li>الحصول على إقامة مؤقتة لطالب اللجوء.</li><li>المقابلة أمام الجهة المختصة.</li><li>انتظار القرار: لجوء، حماية فرعية، أو حماية خاصة.</li></ol><h4>نصائح</h4><ul><li>احتفظ بكل الوثائق والإيصالات.</li><li>اطلب مترجماً — هذا حقك.</li><li>تواصل مع منظمات المساعدة القانونية المجانية.</li></ul>',
         fr: '<h3>Qui est demandeur d\'asile ?</h3><p>Une personne ayant fui son pays pour un danger (guerre, persécution, violence) et demandant une protection internationale en Europe.</p><div class="callout"><b>Entré sans papiers ?</b> Cela ne vous empêche pas de demander l\'asile. Selon la Convention de Genève de 1951 (art. 31), un réfugié ne doit pas être pénalisé pour une entrée ou une présence irrégulière, à condition de se présenter rapidement aux autorités et d\'expliquer honnêtement les raisons de sa fuite. Apportez toute pièce d\'identité disponible — son absence ne supprime pas votre droit à la protection.</div><h4>Étapes</h4><ol><li>Se présenter dès l\'arrivée et demander la protection internationale.</li><li>Enregistrement et prise d\'empreintes.</li><li>Attestation / séjour provisoire.</li><li>Entretien avec l\'autorité compétente.</li><li>Décision : asile, protection subsidiaire ou spéciale.</li></ol><h4>Conseils</h4><ul><li>Gardez tous vos documents.</li><li>Demandez un interprète — c\'est votre droit.</li><li>Contactez l\'aide juridique gratuite.</li></ul>',
         en: '<h3>Who is an asylum seeker?</h3><p>Someone who fled their country due to danger (war, persecution, violence) and asks for international protection in Europe.</p><div class="callout"><b>Entered without papers?</b> This does not prevent you from claiming asylum. Under the 1951 Geneva Convention (Art. 31), a refugee must not be penalized for irregular entry or presence, provided you present yourself to the authorities promptly and honestly explain why you fled. Bring any ID you have — not having one does not remove your right to protection.</div><h4>Main steps</h4><ol><li>Report on arrival and request international protection.</li><li>Registration and fingerprinting.</li><li>Temporary asylum-seeker permit.</li><li>Interview with the competent authority.</li><li>Decision: asylum, subsidiary or special protection.</li></ol><h4>Tips</h4><ul><li>Keep all documents and receipts.</li><li>Ask for an interpreter — it is your right.</li><li>Contact free legal aid organizations.</li></ul>'
+      }
+    },
+    {
+      id: 'hardcases', icon: '🆘', color: '#b91c1c', price: 0,
+      title: { ar: 'الحالات الصعبة', fr: 'Cas difficiles', en: 'Difficult cases' },
+      desc: { ar: 'دخول دون أوراق · فقدان الوثائق · رفض سابق', fr: 'Entrée sans papiers · documents perdus · refus', en: 'No papers · lost documents · prior refusal' },
+      links: [L.unhcr, L.ofpra, L.frAsile, L.polIt, L.bamf, L.ind, L.cgrs, L.fedasil, L.interiorEs],
+      docs: [
+        D('بيان مكتوب بقصتك وأسباب الفرار', 'Récit écrit de votre histoire et des raisons de la fuite', 'Written account of your story and reasons for fleeing'),
+        D('أي وثيقة هوية أو نسخة/صورة إن توفّرت (اختياري)', 'Toute pièce d\'identité ou copie si disponible (facultatif)', 'Any ID or copy if available (optional)'),
+        D('محضر تصريح بفقدان الوثائق (عند فقدانها)', 'Déclaration de perte des documents (si perdus)', 'Loss-of-documents report (if lost)'),
+        D('قرار الرفض السابق + أي عناصر جديدة (عند الرفض)', 'Décision de refus + éléments nouveaux (si refus)', 'Previous refusal decision + any new evidence (if refused)')
+      ],
+      content: {
+        ar: '<h3>الحالات الصعبة</h3><p>إرشادات لمن يواجهون وضعيات خاصة. لا تيأس — لكل حالة مسار قانوني، والأهم أن تطلب المساعدة بسرعة.</p>' +
+          '<h4>1) دخلتُ دون أوراق قانونية</h4><div class="callout"><b>الدخول غير النظامي لا يمنع طلب اللجوء.</b> وفق اتفاقية جنيف 1951 (المادة 31) لا يجوز معاقبتك على الدخول أو التواجد غير النظامي، بشرط أن تتقدّم إلى السلطات في أقرب وقت وتشرح بصدق أسباب فرارك.</div><p>توجّه إلى أقرب جهة مختصة واطلب الحماية الدولية، واروِ قصتك بوضوح وصدق.</p>' +
+          '<h4>2) فقدتُ وثائقي</h4><ul><li>صرّح بفقدان الوثائق (محضر لدى الشرطة إن أمكن).</li><li>يمكن متابعة الإجراءات بالاعتماد على أقوالك وأي نسخ أو صور متاحة؛ غياب الوثائق لا يُلغي حقك.</li><li>لا تتواصل مع سفارة بلدك إذا كان ذلك يعرّضك أنت أو عائلتك للخطر.</li></ul>' +
+          '<h4>3) رُفض طلبي سابقاً</h4><ul><li>يحق لك الطعن أمام المحكمة خلال المهلة القانونية — <b>تصرّف بسرعة</b>.</li><li>يمكن طلب إعادة فحص الملف إذا ظهرت عناصر أو أدلة جديدة.</li><li>اطلب فوراً مساعدة قانونية مجانية أو محامياً مختصاً.</li></ul>' +
+          '<p class="muted">⏳ المهل القانونية قصيرة وتختلف بين الدول؛ لا تتأخر، واطلب المساعدة القانونية فور استلام أي قرار.</p>',
+        fr: '<h3>Cas difficiles</h3><p>Conseils pour des situations particulières. Ne renoncez pas — chaque cas a une voie légale ; l\'essentiel est de demander de l\'aide rapidement.</p>' +
+          '<h4>1) Je suis entré sans papiers</h4><div class="callout"><b>L\'entrée irrégulière n\'empêche pas la demande d\'asile.</b> Selon la Convention de Genève de 1951 (art. 31), vous ne pouvez pas être pénalisé pour une entrée ou une présence irrégulière, à condition de vous présenter rapidement aux autorités et d\'expliquer honnêtement les raisons de votre fuite.</div><p>Rendez-vous à l\'autorité compétente la plus proche et demandez la protection internationale ; racontez votre histoire clairement et honnêtement.</p>' +
+          '<h4>2) J\'ai perdu mes documents</h4><ul><li>Déclarez la perte (procès-verbal de police si possible).</li><li>La procédure peut se poursuivre sur la base de votre récit et de toute copie disponible ; l\'absence de documents ne supprime pas votre droit.</li><li>Ne contactez pas l\'ambassade de votre pays si cela vous met en danger.</li></ul>' +
+          '<h4>3) Ma demande a été refusée</h4><ul><li>Vous pouvez faire appel devant le tribunal dans les délais — <b>agissez vite</b>.</li><li>Un réexamen est possible si de nouveaux éléments apparaissent.</li><li>Demandez immédiatement une aide juridique gratuite ou un avocat spécialisé.</li></ul>' +
+          '<p class="muted">⏳ Les délais sont courts et varient selon les pays ; ne tardez pas et demandez de l\'aide dès réception d\'une décision.</p>',
+        en: '<h3>Difficult cases</h3><p>Guidance for special situations. Do not give up — every case has a legal path; the key is to seek help quickly.</p>' +
+          '<h4>1) I entered without papers</h4><div class="callout"><b>Irregular entry does not bar an asylum claim.</b> Under the 1951 Geneva Convention (Art. 31), you cannot be penalized for irregular entry or presence, provided you present yourself to the authorities promptly and honestly explain why you fled.</div><p>Go to the nearest competent authority and request international protection; tell your story clearly and honestly.</p>' +
+          '<h4>2) I lost my documents</h4><ul><li>Report the loss (police report if possible).</li><li>The procedure can continue based on your account and any available copies; missing documents do not remove your right.</li><li>Do not contact your country\'s embassy if it puts you or your family at risk.</li></ul>' +
+          '<h4>3) My claim was refused</h4><ul><li>You can appeal before the court within the deadline — <b>act fast</b>.</li><li>A re-examination is possible if new evidence appears.</li><li>Immediately seek free legal aid or a specialized lawyer.</li></ul>' +
+          '<p class="muted">⏳ Deadlines are short and vary by country; do not delay, and seek legal help as soon as you receive any decision.</p>'
       }
     },
     {
