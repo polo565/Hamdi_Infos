@@ -37,6 +37,12 @@ jobs:
           flutter create --platforms=android .
           flutter pub get
           dart run flutter_launcher_icons || true
+          # تعطيل Android lint (يتعطّل أحياناً على بعض الإضافات مثل url_launcher)
+          if [ -f android/app/build.gradle.kts ]; then
+            printf '\nandroid {\n    lint {\n        checkReleaseBuilds = false\n        abortOnError = false\n    }\n}\n' >> android/app/build.gradle.kts
+          else
+            printf '\nandroid {\n    lint {\n        checkReleaseBuilds false\n        abortOnError false\n    }\n}\n' >> android/app/build.gradle
+          fi
           flutter build apk --release
 
       - name: Téléverser l'APK

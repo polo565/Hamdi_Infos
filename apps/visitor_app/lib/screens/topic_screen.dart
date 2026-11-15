@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../api.dart';
 import '../main.dart';
-import 'home_screen.dart';
+import '../html_view.dart';
 
 class TopicScreen extends StatefulWidget {
   final Map<dynamic, dynamic> tab;
@@ -110,7 +109,7 @@ class _TopicScreenState extends State<TopicScreen> {
       Card(
         child: Padding(
           padding: const EdgeInsets.all(14),
-          child: Html(data: AppState.pick(_content)),
+          child: HtmlView(AppState.pick(_content)),
         ),
       ),
       _docsSection(),
