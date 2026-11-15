@@ -5,7 +5,7 @@
 
 var PROP = PropertiesService.getScriptProperties();
 var DEFAULT_ADMIN_KEY = 'admin';
-var SCHEMA = '8';
+var SCHEMA = '9';
 
 /* -------------------- Routage -------------------- */
 function doGet(e) {
@@ -346,7 +346,11 @@ function seedTabs_() {
       title: { ar: 'حقوقك وواجباتك', fr: 'Droits et devoirs', en: 'Rights & duties' },
       desc: { ar: 'ما لك وما عليك أثناء الإجراءات', fr: 'Vos droits et obligations', en: 'What you may and must do' },
       links: [L.unhcr, L.fedasil, L.cgrs],
-      docs: [],
+      docs: [
+        D('إثبات الهوية أو إقامة طالب اللجوء', 'Pièce d\'identité ou attestation de demandeur d\'asile', 'ID or asylum-seeker attestation'),
+        D('إيصالات ومواعيد رسمية (احتفظ بها)', 'Récépissés et convocations officielles (à garder)', 'Official receipts and appointment notices (keep them)'),
+        D('بيانات محامٍ أو جمعية مساعدة قانونية', 'Coordonnées d\'un avocat ou d\'une association', 'Contact of a lawyer or legal-aid NGO')
+      ],
       content: {
         ar: '<h3>حقوقك وواجباتك</h3><h4>حقوقك</h4><ul><li>الحق في مترجم ومحامٍ.</li><li>الحق في الرعاية الصحية الطارئة.</li><li>الحق في معاملة إنسانية.</li></ul><h4>واجباتك</h4><ul><li>احترام القوانين المحلية.</li><li>الحضور في المواعيد الرسمية.</li><li>تحديث عنوانك لدى السلطات.</li></ul>',
         fr: '<h3>Vos droits et devoirs</h3><h4>Droits</h4><ul><li>Droit à un interprète et à un avocat.</li><li>Droit aux soins d\'urgence.</li><li>Droit à un traitement digne.</li></ul><h4>Devoirs</h4><ul><li>Respecter les lois locales.</li><li>Se présenter aux rendez-vous.</li><li>Mettre à jour votre adresse.</li></ul>',
@@ -358,7 +362,12 @@ function seedTabs_() {
       title: { ar: 'المعونات والمساعدات', fr: 'Aides', en: 'Aid & assistance' },
       desc: { ar: 'سكن، طعام، صحة، ودعم قانوني مجاني', fr: 'Logement, nourriture, santé, aide', en: 'Housing, food, health, legal aid' },
       links: [L.unhcr, L.caritas, L.fedasil, L.cear],
-      docs: [],
+      docs: [
+        D('إثبات الهوية أو إقامة طالب اللجوء', 'Pièce d\'identité ou attestation', 'ID or attestation'),
+        D('إثبات العنوان أو شهادة إيواء', 'Justificatif de domicile ou d\'hébergement', 'Proof of address or accommodation'),
+        D('إثبات الوضعية العائلية (للمساعدات العائلية)', 'Justificatif de situation familiale', 'Proof of family situation'),
+        D('الرمز الصحي للرعاية الطارئة (مثل STP)', 'Code santé pour les soins (ex. STP)', 'Health code for care (e.g. STP)', 'IT')
+      ],
       content: {
         ar: '<h3>المعونات والمساعدات</h3><p>توجد جهات حكومية وجمعيات تقدّم السكن والطعام والرعاية الصحية والدعم القانوني مجاناً.</p><ul><li>مراكز الاستقبال الرسمية.</li><li>الرعاية الصحية الطارئة متاحة للجميع.</li><li>جمعيات: Caritas، الصليب الأحمر، وغيرها.</li><li>المساعدة القانونية المجانية.</li></ul>',
         fr: '<h3>Aides et assistance</h3><p>Des services publics et des associations offrent gratuitement hébergement, nourriture, soins et aide juridique.</p><ul><li>Centres d\'accueil officiels.</li><li>Soins d\'urgence pour tous.</li><li>Associations : Caritas, Croix-Rouge, etc.</li><li>Aide juridique gratuite.</li></ul>',
@@ -370,7 +379,10 @@ function seedTabs_() {
       title: { ar: 'أسئلة شائعة', fr: 'FAQ', en: 'FAQ' },
       desc: { ar: 'إجابات سريعة لأكثر الأسئلة تكراراً', fr: 'Réponses aux questions fréquentes', en: 'Quick answers to common questions' },
       links: [L.unhcr],
-      docs: [],
+      docs: [
+        D('نسخ (ورقية ورقمية) من كل وثائقك', 'Copies (papier et numériques) de tous vos documents', 'Copies (paper and digital) of all your documents'),
+        D('أرقام ملفاتك ومواعيدك الرسمية', 'Numéros de dossier et dates de rendez-vous', 'Your case numbers and appointment dates')
+      ],
       content: {
         ar: '<h3>أسئلة شائعة</h3><p><b>هل أحتاج محامياً؟</b> ليس إلزامياً لكنه مفيد، وهناك مساعدة قانونية مجانية.</p><p><b>كم يستغرق قرار اللجوء؟</b> من بضعة أشهر إلى أكثر من سنة.</p><p><b>ماذا لو رُفض طلبي؟</b> يمكنك الطعن أمام المحكمة خلال المهلة القانونية.</p>',
         fr: '<h3>FAQ</h3><p><b>Ai-je besoin d\'un avocat ?</b> Non obligatoire mais utile ; l\'aide juridique gratuite existe.</p><p><b>Durée de la décision ?</b> De quelques mois à plus d\'un an.</p><p><b>En cas de refus ?</b> Vous pouvez faire appel dans les délais.</p>',
